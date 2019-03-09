@@ -40,7 +40,11 @@ Follow these instructions when setting up on a new machine:
 6. Clone the required addons in your `OF_PATH/addons` folder.
     1. Each of the addons should have a README if there are more specific installation instructions.
     2. Note that for [ofxKinectForWindows2](https://github.com/elliotwoods/ofxKinectForWindows2), you need to checkout the `0.9.0` tag: 
-    ```git checkout 0.9.0```
+
+    ```
+    git checkout 0.9.0
+    ```
+
 7. Download and Install Google Protobuf:
     1. Start by installing [vcpkg](https://github.com/Microsoft/vcpkg)
         - If `vcpkg` and protobuf are already installed, you can update to the latest protobuf compilier by doing [this](https://github.com/Microsoft/vcpkg/blob/master/docs/about/faq.md#how-do-i-update-libraries).
@@ -48,10 +52,27 @@ Follow these instructions when setting up on a new machine:
         - While in the `vcpkg` directory, run `>vcpkg install protobuf protobuf:x64-windows`
 
     2. To build the `body.proto`:
-        1. Navigate to `C:\vcpkg\installed\protobuf\x64-windows\tools` and mkdir `\body`
-        2. Copy `body.proto` from this repo's `\proto` and paste it into `C:\vcpkg\installed\protobuf\x64-windows\tools\body`
-        3. Move the contents in `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf` one folder up and delete the now empty `\protobuf` folder
-        4. Run the following command in PS: `.\protoc --proto_path=body --cpp_out=body body/body.proto` for C++, or `.\protoc --proto_path=body --python_out=body body/body.proto` for Python
+        1. Navigate to `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf` and make a new directory named body:
+        
+        ```
+        cd vcpkg/installed/protobuf/x64-windows/tools/protobuf
+        mkdir body
+        ```
+       
+        2. Copy the `\proto\body.proto` in this repo to our new `\body` directory:
+        
+        ```
+        cp ~/path/to/repo/proto/body.proto ./body/
+        ```
+
+        3. Generate the C++ or Python proto files: 
+
+        ```
+        `.\protoc --proto_path=body --cpp_out=body body/body.proto
+        ```
+        ```
+        .\protoc --proto_path=body --python_out=body body/body.proto
+        ```
  
 #### Setting Up the Project
 Once you have the basic components installed on your computer, follow these instructions to setup the MSVS project:

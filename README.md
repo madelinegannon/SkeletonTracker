@@ -53,7 +53,8 @@ Follow these instructions when setting up on a new machine:
     ```
 
 7. Download and Install Google Protobuf:
-    1. Start by [installing vcpkg](https://github.com/Microsoft/vcpkg):
+
+    Start by [installing vcpkg](https://github.com/Microsoft/vcpkg):
     
     ```
     > cd /
@@ -67,7 +68,7 @@ Follow these instructions when setting up on a new machine:
     If `vcpkg` and protobuf are already installed, you can update to the latest protobuf compilier by doing [this](https://github.com/Microsoft/vcpkg/blob/master/docs/about/faq.md#how-do-i-update-libraries).
 
     
-    2. Follow Protobuf C++ Installation Instructions [for Windows](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md#c-installation---windows):
+    Follow Protobuf C++ Installation Instructions [for Windows](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md#c-installation---windows):
     
     ```
     PS> vcpkg install protobuf protobuf:x64-windows
@@ -75,20 +76,20 @@ Follow these instructions when setting up on a new machine:
     
 8. Build the `body.proto`:
 
-    1. Navigate to `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf` and make a new directory named `body`:
+    Navigate to `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf` and make a new directory named `body`:
         
     ```
     cd vcpkg/installed/protobuf/x64-windows/tools/protobuf
     mkdir body
     ```
        
-    2. Copy the `\proto\body.proto` in this repo to our new `\body` directory:
+    Copy the `\proto\body.proto` in this repo to our new `\body` directory:
         
     ```
     cp ~/path/to/repo/proto/body.proto ./body/
     ```
 
-    3. Generate the C++ or Python proto files: 
+    Generate the C++ or Python proto files: 
 
     `For C++:`
     ```
@@ -104,10 +105,24 @@ Follow these instructions when setting up on a new machine:
 Once you have the basic components installed on your computer, follow these instructions to setup the MSVS project:
 
 1. Open the openFrameworks Project Generator and click `import` to load the existing project directory.
-   - Be sure the following addons are selected: ofxGui, ofxNetwork, ofxOneEuroFilter, ofxOsc
-   - DO NOT add ofxKinectForWindows2 yet ... we'll do that next manually.
-2. Open the generated project in the IDE and follow the _Usage_ instructions from the [ofxKinectForWindows2 README](https://github.com/elliotwoods/ofxKinectForWindows2) to properly add the addon:
+
+   You should see the following addons selected:
+       
+   ```
+   ofxGui
+   ofxNetwork
+   ofxOneEuroFilter
+   ofxOsc
+   ```
+
+   **DO NOT** add ofxKinectForWindows2 yet ... we'll do that next manually.
+
+Open the generated project in the IDE and follow the _Usage_ instructions from the [ofxKinectForWindows2 README](https://github.com/elliotwoods/ofxKinectForWindows2) to properly add the addon:
+
     1. Open the solution, and add the ofxKinectForWindows2Lib.vcxproj to your solution (right click on the Solution and choose _Add > Existing Project..._)
+
     2. In Property Manager (open it from _View -> Other Windows -> Property Manager_), right click on your project to select _Add Existing Property Sheet..._ and select the `ofxKinectForWindows2.props` file.
+
     3. Go back to Solution Explorer, right click on your project (e.g. 'mySketch') and select '_Add Reference..._', and add a reference to `ofxKinectForWindows2Lib`.
+    
 3. 

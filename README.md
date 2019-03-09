@@ -1,16 +1,25 @@
 # SkeletonTracker
-openFrameworks app that tracks and broadcasts skeletal data from a  Microsoft Kinect (V2)
+An openFrameworks app that tracks and broadcasts skeletal data from a  Microsoft Kinect (V2)
 
 - [Basic Usage and Limitations]()
 - [Getting Started]()
-    -[Building From Scratch]()
-    -[Setting Up the Project]()
+    - [Building From Scratch]()
+        - [Setting Up the Project]()
+    - [Running the Exe]()
 
 
 ## Basic Use and Limitations
-Tested on MSVS Pro 2017, [openFrameworks v0.9.8](https://openframeworks.cc/download/older/), [Kinect SDK 2.0](https://www.microsoft.com/en-us/download/details.aspx?id=44561)
+Tested with: 
+- MSVS Pro 2017
+- [openFrameworks v0.9.8](https://openframeworks.cc/download/older/)
+- [Kinect SDK 2.0](https://www.microsoft.com/en-us/download/details.aspx?id=44561)
+- [Google Protobuf 3](https://developers.google.com/protocol-buffers/)
 
-Required openframeworks addons: [ofxKinectForWindows2](https://github.com/elliotwoods/ofxKinectForWindows2), [ofxOneEuroFilter](https://github.com/i-n-g-o/ofxOneEuroFilter), ofxNetwork
+Required openframeworks addons:
+- [ofxKinectForWindows2](https://github.com/elliotwoods/ofxKinectForWindows2)
+- [ofxOneEuroFilter](https://github.com/i-n-g-o/ofxOneEuroFilter)
+- ofxNetwork
+- ofxGui
 
 #### Basic Controls and Usage
 
@@ -27,15 +36,17 @@ Follow these instructions when setting up on a new machine:
 2. Download and Install the [Kinect SDK 2.0](https://www.microsoft.com/en-us/download/details.aspx?id=44561) from Microsoft.
 3. Restart your computer to finalize the MSVS and Kinect SDK setup.
 4. Verify successful installation by plugging your sensor into a USB 3.0 port and running the SDK's Kinect Studio v2.0 app. Under the `MONITOR` tab, click the icon at the top left to toggle _Connected / Not Connected_.
-5. [Download](https://openframeworks.cc/download/older/), [Install](https://openframeworks.cc/setup/vs/), and Build **openFrameworks v0.9.8.**
-6. Clone the required addons in your `OF_PATH/addons` folder
-    - Each of the addons should have a README if there are more specific installation instructions.
-    - Note that for [ofxKinectForWindows2](https://github.com/elliotwoods/ofxKinectForWindows2), you need to checkout the `0.9.0` tag: ```git checkout 0.9.0```
+5. [Download](https://openframeworks.cc/download/older/), [Install](https://openframeworks.cc/setup/vs/), and [Build](https://openframeworks.cc/learning/01_basics/how_to_add_addon_to_project/) openFrameworks **v0.9.8.**
+6. Clone the required addons in your `OF_PATH/addons` folder.
+    1. Each of the addons should have a README if there are more specific installation instructions.
+    2. Note that for [ofxKinectForWindows2](https://github.com/elliotwoods/ofxKinectForWindows2), you need to checkout the `0.9.0` tag: ```
+    git checkout 0.9.0
+    ```
 7. Download and Install Google Protobuf:
-    1. Follow Protobuf C++ Installation Instructions [for Windows](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md#c-installation---windows)
-        - Start by installing [vcpkg](https://github.com/Microsoft/vcpkg)
-        - Or ... update to the latest protobuf compilier.
-        - [Update through vcpkg](https://github.com/Microsoft/vcpkg/blob/master/docs/about/faq.md#how-do-i-update-libraries)
+    1. Start by installing [vcpkg](https://github.com/Microsoft/vcpkg)
+        - If `vcpkg` and protobuf are already installed, you can update to the latest protobuf compilier by doing [this](https://github.com/Microsoft/vcpkg/blob/master/docs/about/faq.md#how-do-i-update-libraries)
+    2. Follow Protobuf C++ Installation Instructions [for Windows](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md#c-installation---windows)
+        - While in the `vcpkg` directory, run `>vcpkg install protobuf protobuf:x64-windows`
 
     2. To build the `body.proto`:
         1. Navigate to `C:\vcpkg\installed\protobuf\x64-windows\tools` and mkdir `\body`

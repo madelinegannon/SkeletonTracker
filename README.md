@@ -49,6 +49,7 @@ Follow these instructions when setting up on a new machine:
     2. Note that for [ofxKinectForWindows2](https://github.com/elliotwoods/ofxKinectForWindows2), you need to checkout the `0.9.0` tag: 
 
     ```
+    > cd OF_PATH/addons/ofxKinectForWindows2
     > git checkout 0.9.0
     ```
 
@@ -117,7 +118,9 @@ Once you have the basic components installed on your computer, follow these inst
 
    **DO NOT** add ofxKinectForWindows2 yet ... we'll do that next manually.
 
-2. Open the generated project in the IDE and follow the _Usage_ instructions from the [ofxKinectForWindows2 README](https://github.com/elliotwoods/ofxKinectForWindows2) to properly add the addon:
+2. Add ofxKinectForWindows2 project dependency to your solution.
+    
+    Follow the _Usage_ instructions from the [ofxKinectForWindows2 README](https://github.com/elliotwoods/ofxKinectForWindows2) to properly add the addon:
 
     - Open the solution, and add the ofxKinectForWindows2Lib.vcxproj to your solution (right click on the Solution and choose _Add > Existing Project..._)
 
@@ -125,4 +128,24 @@ Once you have the basic components installed on your computer, follow these inst
 
     - Go back to Solution Explorer, right click on your project (e.g. 'mySketch') and select '_Add Reference..._', and add a reference to `ofxKinectForWindows2Lib`.
 
-3. 
+3. Add the `body` proto to the solution.
+
+    In _Project Properties > C/C++ > General > Additional Include Directories_ add the following: 
+
+    ```
+    C:\vcpkg\installed\protobuf\x64-windows\tools\body; C:\vcpkg\installed\protobuf\x64-windows\include;C:\vcpkg\installed\protobuf\x64-windows\include\google;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\compiler;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\compiler\cpp;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\io;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\stubs;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\util
+    ```
+
+    In _Project Properties > C/C++ > Linker > Input > Additional Dependencies_ add the following:
+
+    ```
+    C:\vcpkg\installed\protobuf\x64-windows\lib\libprotobuf.lib
+    ```
+
+    In the Solution Explorer, right click on the project and select '_Add Existing Item..._'. Add the `body.pb.cc` and `body.pb.h` files in `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf\body`.
+
+    Copy _libprotobuf.dll_ from `C:\vcpkg\installed\protobuf\x64-windows\bin` to the project directory that containing the .exe:
+
+    ```
+    cp C:\vcpkg\installed\protobuf\x64-windows\bin\libprotobuf.dll ~/path/to/repo/SkeletonTracker/bin
+    ```

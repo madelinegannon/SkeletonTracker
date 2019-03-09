@@ -38,7 +38,7 @@ Follow these instructions when setting up on a new machine:
 
 3. Restart your computer to finalize the MSVS and Kinect SDK setup.
 
-    1. Verify successful installation by plugging your sensor into a USB 3.0 port and running the SDK's Kinect Studio v2.0 app. Under the `MONITOR` tab, click the icon at the top left to toggle _Connected / Not Connected_.
+    1. Verify successful installation by plugging your sensor into a USB 3.0 port and running the SDK's `Kinect Studio v2.0` app. Under the `MONITOR` tab, click the icon at the top left to toggle _Connected / Not Connected_.
 
 5. [Download](https://openframeworks.cc/download/older/), [Install](https://openframeworks.cc/setup/vs/), and [Build](https://openframeworks.cc/learning/01_basics/how_to_add_addon_to_project/) **openFrameworks v0.9.8.**
 
@@ -53,7 +53,7 @@ Follow these instructions when setting up on a new machine:
     ```
 
 7. Download and Install Google Protobuf:
-    1. Start by [installing vcpkg](https://github.com/Microsoft/vcpkg)
+    1. Start by [installing vcpkg](https://github.com/Microsoft/vcpkg):
     
     ```
     > cd /
@@ -64,15 +64,17 @@ Follow these instructions when setting up on a new machine:
     PS> .\vcpkg integrate install
     ```
     
-    - If `vcpkg` and protobuf are already installed, you can update to the latest protobuf compilier by doing [this](https://github.com/Microsoft/vcpkg/blob/master/docs/about/faq.md#how-do-i-update-libraries).
+    If `vcpkg` and protobuf are already installed, you can update to the latest protobuf compilier by doing [this](https://github.com/Microsoft/vcpkg/blob/master/docs/about/faq.md#how-do-i-update-libraries).
 
-    2. Follow Protobuf C++ Installation Instructions [for Windows](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md#c-installation---windows)
+    
+    2. Follow Protobuf C++ Installation Instructions [for Windows](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md#c-installation---windows):
     
     ```
     PS> vcpkg install protobuf protobuf:x64-windows
     ```
     
-8. To build the `body.proto`:
+8. Build the `body.proto`:
+
     1. Navigate to `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf` and make a new directory named `body`:
         
     ```
@@ -88,12 +90,12 @@ Follow these instructions when setting up on a new machine:
 
     3. Generate the C++ or Python proto files: 
 
-    For C++:
+    `For C++:`
     ```
     .\protoc --proto_path=body --cpp_out=body body/body.proto
     ```
         
-    For Python:
+    `For Python:`
     ```
     .\protoc --proto_path=body --python_out=body body/body.proto
      ```

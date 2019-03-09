@@ -37,7 +37,7 @@ Follow these instructions when setting up on a new machine:
         - Or ... update to the latest protobuf compilier.
         - [Update through vcpkg](https://github.com/Microsoft/vcpkg/blob/master/docs/about/faq.md#how-do-i-update-libraries)
 
-    To build the `body.proto`:
+    2. To build the `body.proto`:
         1. Navigate to `C:\vcpkg\installed\protobuf\x64-windows\tools` and mkdir `\body`
         2. Copy `body.proto` from this repo's `\proto` and paste it into `C:\vcpkg\installed\protobuf\x64-windows\tools\body`
         3. Move the contents in `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf` one folder up and delete the now empty `\protobuf` folder

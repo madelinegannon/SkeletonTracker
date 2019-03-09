@@ -69,3 +69,4 @@ build/
 *.db-wal
 *.db-shm
 *.db-wal
+*.rc

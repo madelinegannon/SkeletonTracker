@@ -4,7 +4,7 @@ An openFrameworks app that tracks and broadcasts skeletal data from a  Microsoft
 - [Basic Usage and Limitations]()
 - [Getting Started]()
     - [Building From Scratch]()
-        - [Setting Up the Project]()
+    - [Setting Up the Project]()
     - [Running the Exe]()
 
 
@@ -102,7 +102,7 @@ Follow these instructions when setting up on a new machine:
     .\protoc --proto_path=body --python_out=body body/body.proto
      ```
  
-#### Setting Up the Project
+### Setting Up the Project
 Once you have the basic components installed on your computer, follow these instructions to setup the MSVS project:
 
 1. Open the openFrameworks Project Generator and click `import` to load the existing project directory.
@@ -133,7 +133,7 @@ Once you have the basic components installed on your computer, follow these inst
     In _Project Properties > C/C++ > General > Additional Include Directories_ add the following: 
 
     ```
-    C:\vcpkg\installed\protobuf\x64-windows\tools\body; C:\vcpkg\installed\protobuf\x64-windows\include;C:\vcpkg\installed\protobuf\x64-windows\include\google;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\compiler;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\compiler\cpp;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\io;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\stubs;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\util
+    C:\vcpkg\installed\protobuf\x64-windows\tools\body;C:\vcpkg\installed\protobuf\x64-windows\include;C:\vcpkg\installed\protobuf\x64-windows\include\google;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\compiler;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\compiler\cpp;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\io;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\stubs;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\util
     ```
 
     In _Project Properties > C/C++ > Linker > Input > Additional Dependencies_ add the following:
@@ -142,10 +142,12 @@ Once you have the basic components installed on your computer, follow these inst
     C:\vcpkg\installed\protobuf\x64-windows\lib\libprotobuf.lib
     ```
 
-    In the Solution Explorer, right click on the project and select '_Add Existing Item..._'. Add the `body.pb.cc` and `body.pb.h` files in `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf\body`.
+    In the Solution Explorer, right click on the project and select '_Add Existing Item..._'. 
+
+    - Add the `body.pb.cc` and `body.pb.h` files in `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf\body`.
 
     Copy _libprotobuf.dll_ from `C:\vcpkg\installed\protobuf\x64-windows\bin` to the project directory that containing the .exe:
 
     ```
-    cp C:\vcpkg\installed\protobuf\x64-windows\bin\libprotobuf.dll ~/path/to/repo/SkeletonTracker/bin
+    > cp C:\vcpkg\installed\protobuf\x64-windows\bin\libprotobuf.dll ~/path/to/repo/SkeletonTracker/bin
     ```

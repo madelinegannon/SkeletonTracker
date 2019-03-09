@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+package srl.body;
+
+// Global cartesian position in mm
+message Position
+{
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+// Normalized quaternion orientation
+message Quaternion
+{
+  double x = 1;
+  double y = 2;
+  double z = 3;
+  double w = 4;
+}
+
+// Pose (i.e. cartesian position and Quaternion orientation)
+message Pose
+{
+  Position pos = 1;
+  Quaternion	orient = 2;
+}
+
+// Joint
+message Joint
+{
+  int32 id = 1;
+  string name = 2;
+  Pose pose = 3;
+}
+
+// Special structure just of Joints that make up the hands
+message Hand
+{
+  int32 id = 1;
+  string name = 2;
+
+  enum HandState{
+    UNKNOWN = 0;
+    NOT_TRACKED = 1;
+    OPEN = 3;
+    CLOSED = 4;
+  }
+  HandState state = 3;
+
+  repeated Joint joints = 4;
+}
+
+// Actual Coordinates for the robot to move towards
+// ... within the robot's reach
+message Targets
+{
+  Pose left = 1;
+  Pose right = 2;
+}
+
+
+// Body
+message Body
+{
+  int32 id = 1;
+  string name = 2;
+  uint32 time_stamp = 3;    // time stamp in ms
+
+  enum InteractionMode {
+    NONE = 0;
+    FOLLOW = 1;
+    MIRROR = 2;
+    AVOID = 3;
+  }
+  InteractionMode interaction_mode = 4;
+
+  enum State{
+    DEFAULT = 0;
+    ACTIVE = 1;
+    DEAD = 2;
+  }
+  State state = 5;
+
+  repeated Joint joints = 6;
+  repeated Hand hands = 7;
+  Targets targets = 8;
+}

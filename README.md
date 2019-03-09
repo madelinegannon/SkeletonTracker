@@ -52,7 +52,7 @@ Follow these instructions when setting up on a new machine:
         - While in the `vcpkg` directory, run `>vcpkg install protobuf protobuf:x64-windows`
 
     2. To build the `body.proto`:
-        1. Navigate to `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf` and make a new directory named body:
+        1. Navigate to `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf` and make a new directory named `body`:
         
         ```
         cd vcpkg/installed/protobuf/x64-windows/tools/protobuf
@@ -67,9 +67,12 @@ Follow these instructions when setting up on a new machine:
 
         3. Generate the C++ or Python proto files: 
 
+        For C++:
         ```
-        `.\protoc --proto_path=body --cpp_out=body body/body.proto
+        .\protoc --proto_path=body --cpp_out=body body/body.proto
         ```
+        
+        For Python:
         ```
         .\protoc --proto_path=body --python_out=body body/body.proto
         ```

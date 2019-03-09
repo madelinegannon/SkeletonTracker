@@ -40,7 +40,7 @@ Follow these instructions when setting up on a new machine:
 
     1. Verify successful installation by plugging your sensor into a USB 3.0 port and running the SDK's `Kinect Studio v2.0` app. Under the `MONITOR` tab, click the icon at the top left to toggle _Connected / Not Connected_.
 
-5. [Download](https://openframeworks.cc/download/older/), [Install](https://openframeworks.cc/setup/vs/), and [Build](https://openframeworks.cc/learning/01_basics/how_to_add_addon_to_project/) **openFrameworks v0.9.8.**
+5. [Download](https://openframeworks.cc/download/older/), [Install](https://openframeworks.cc/setup/vs/), and [Build](https://openframeworks.cc/learning/01_basics/how_to_add_addon_to_project/) **openFrameworks v0.9.8**.
 
 6. Clone the required addons in your `OF_PATH/addons` folder.
 
@@ -117,12 +117,12 @@ Once you have the basic components installed on your computer, follow these inst
 
    **DO NOT** add ofxKinectForWindows2 yet ... we'll do that next manually.
 
-Open the generated project in the IDE and follow the _Usage_ instructions from the [ofxKinectForWindows2 README](https://github.com/elliotwoods/ofxKinectForWindows2) to properly add the addon:
+2. Open the generated project in the IDE and follow the _Usage_ instructions from the [ofxKinectForWindows2 README](https://github.com/elliotwoods/ofxKinectForWindows2) to properly add the addon:
 
-    1. Open the solution, and add the ofxKinectForWindows2Lib.vcxproj to your solution (right click on the Solution and choose _Add > Existing Project..._)
+    - Open the solution, and add the ofxKinectForWindows2Lib.vcxproj to your solution (right click on the Solution and choose _Add > Existing Project..._)
 
-    2. In Property Manager (open it from _View -> Other Windows -> Property Manager_), right click on your project to select _Add Existing Property Sheet..._ and select the `ofxKinectForWindows2.props` file.
+    - In Property Manager (open it from _View -> Other Windows -> Property Manager_), right click on your project to select _Add Existing Property Sheet..._ and select the `ofxKinectForWindows2.props` file.
 
-    3. Go back to Solution Explorer, right click on your project (e.g. 'mySketch') and select '_Add Reference..._', and add a reference to `ofxKinectForWindows2Lib`.
-    
+    - Go back to Solution Explorer, right click on your project (e.g. 'mySketch') and select '_Add Reference..._', and add a reference to `ofxKinectForWindows2Lib`.
+
 3. 

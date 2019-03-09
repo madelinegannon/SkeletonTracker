@@ -40,12 +40,12 @@ Follow these instructions when setting up on a new machine:
 
     1. Verify successful installation by plugging your sensor into a USB 3.0 port and running the SDK's Kinect Studio v2.0 app. Under the `MONITOR` tab, click the icon at the top left to toggle _Connected / Not Connected_.
 
-5. [Download](https://openframeworks.cc/download/older/), [Install](https://openframeworks.cc/setup/vs/), and [Build](https://openframeworks.cc/learning/01_basics/how_to_add_addon_to_project/) openFrameworks **v0.9.8.**
+5. [Download](https://openframeworks.cc/download/older/), [Install](https://openframeworks.cc/setup/vs/), and [Build](https://openframeworks.cc/learning/01_basics/how_to_add_addon_to_project/) **openFrameworks v0.9.8.**
 
 6. Clone the required addons in your `OF_PATH/addons` folder.
 
     1. Each of the addons should have a README if there are more specific installation instructions.
-    
+
     2. Note that for [ofxKinectForWindows2](https://github.com/elliotwoods/ofxKinectForWindows2), you need to checkout the `0.9.0` tag: 
 
     ```
@@ -63,7 +63,9 @@ Follow these instructions when setting up on a new machine:
     PS> .\bootstrap-vcpkg.bat
     PS> .\vcpkg integrate install
     ```
-        - If `vcpkg` and protobuf are already installed, you can update to the latest protobuf compilier by doing [this](https://github.com/Microsoft/vcpkg/blob/master/docs/about/faq.md#how-do-i-update-libraries).
+    
+    - If `vcpkg` and protobuf are already installed, you can update to the latest protobuf compilier by doing [this](https://github.com/Microsoft/vcpkg/blob/master/docs/about/faq.md#how-do-i-update-libraries).
+
     2. Follow Protobuf C++ Installation Instructions [for Windows](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md#c-installation---windows)
     
     ```
@@ -86,12 +88,12 @@ Follow these instructions when setting up on a new machine:
 
     3. Generate the C++ or Python proto files: 
 
-        For C++:
+    For C++:
     ```
     .\protoc --proto_path=body --cpp_out=body body/body.proto
     ```
         
-        For Python:
+    For Python:
     ```
     .\protoc --proto_path=body --python_out=body body/body.proto
      ```

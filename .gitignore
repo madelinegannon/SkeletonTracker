@@ -70,3 +70,7 @@ build/
 *.db-shm
 *.db-wal
 *.rc
+
+*.exp
+*.iobj
+*.ipdb

@@ -5,7 +5,7 @@ An openFrameworks app that tracks and broadcasts skeletal data from a  Microsoft
 - [Getting Started]()
     - [Building From Scratch]()
     - [Setting Up the Project]()
-    - [Running the Exe]()
+- [Running the Exe]()
 
 
 ## Basic Use and Limitations
@@ -74,6 +74,12 @@ Follow these instructions when setting up on a new machine:
     ```
     PS> vcpkg install protobuf protobuf:x64-windows
     ```
+
+    Add a SYSTEM VARIABLE for your vcpkg directory path:
+
+    - Search for _Advanced System Settings_
+    - Click the _Environmental Variables_ button on the bottom left
+    - Create a new System Variable `VCPKG` for `/path/to/vcpkg`
     
 8. Build the `body.proto`:
 
@@ -118,7 +124,7 @@ Once you have the basic components installed on your computer, follow these inst
 
    **DO NOT** add ofxKinectForWindows2 yet ... we'll do that next manually.
 
-2. Add ofxKinectForWindows2 project dependency to your solution.
+2. Add `ofxKinectForWindows2` project dependency to your solution.
     
     Follow the _Usage_ instructions from the [ofxKinectForWindows2 README](https://github.com/elliotwoods/ofxKinectForWindows2) to properly add the addon:
 
@@ -133,21 +139,26 @@ Once you have the basic components installed on your computer, follow these inst
     In _Project Properties > C/C++ > General > Additional Include Directories_ add the following: 
 
     ```
-    C:\vcpkg\installed\protobuf\x64-windows\tools\body;C:\vcpkg\installed\protobuf\x64-windows\include;C:\vcpkg\installed\protobuf\x64-windows\include\google;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\compiler;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\compiler\cpp;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\io;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\stubs;C:\vcpkg\installed\protobuf\x64-windows\include\google\protobuf\util
+    $(VCPKG)\installed\x64-windows\tools\protobuf\body;$(VCPKG)\installed\x64-windows\include;$(VCPKG)\installed\x64-windows\include\google;$(VCPKG)\installed\x64-windows\include\google\protobuf;$(VCPKG)\installed\x64-windows\include\google\protobuf\compiler;$(VCPKG)\installed\x64-windows\include\google\protobuf\compiler\cpp;$(VCPKG)\installed\x64-windows\include\google\protobuf\io;$(VCPKG)\installed\x64-windows\include\google\protobuf\stubs;$(VCPKG)\installed\x64-windows\include\google\protobuf\util
     ```
 
     In _Project Properties > C/C++ > Linker > Input > Additional Dependencies_ add the following:
 
     ```
-    C:\vcpkg\installed\protobuf\x64-windows\lib\libprotobuf.lib
+    $(VCPKG)\installed\x64-windows\lib\libprotobuf.lib
     ```
 
     In the Solution Explorer, right click on the project and select '_Add Existing Item..._'. 
 
-    - Add the `body.pb.cc` and `body.pb.h` files in `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf\body`.
+    - Add the `body.pb.cc` and `body.pb.h` files from the `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf\body` directory.
 
     Copy _libprotobuf.dll_ from `C:\vcpkg\installed\protobuf\x64-windows\bin` to the project directory that containing the .exe:
 
     ```
-    > cp C:\vcpkg\installed\protobuf\x64-windows\bin\libprotobuf.dll ~/path/to/repo/SkeletonTracker/bin
+    > cp \vcpkg\installed\x64-windows\tools\protobuf\libprotobuf.dll ~/path/to/repo/SkeletonTracker/bin
     ```
+
+4. At this point, you should see no linker or include errors in your MSVS solution. If that's not the case, double check your Project Properties file names.
+
+
+### Running the App

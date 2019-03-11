@@ -185,12 +185,18 @@ This app uses a sophisticated and highly-technical calibration routine to ensure
 
 These values are saved on exit in the _bin/data/settings.xml_ file. You can manually adjust the values in this file, and then restart the app for finer numeric control.
 
+### Using the GUI
+
+There are a few useful things to point out in the GUI. First, hitting the `Save` icon in the top right writes out the current parameters to a settings file in  _bin/data/settings.xml_ file.
+
+Second, you can toggle streaming data ON and OFF using `Stream Bodies` button towards the top.
+
 ![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_params_streaming.png)
 
 #### Keypressed Cheat Sheet
 
 `G`:
-Toggles the GUI and Fullscreen Mode
+Toggles hiding the GUI and Fullscreen Mode
 
 `1`:
 Show TOP VIEW

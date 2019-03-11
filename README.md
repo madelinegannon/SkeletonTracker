@@ -175,14 +175,14 @@ Once you have the basic components installed on your computer, follow these inst
 
 ## Running the App
 
-If the app is already built, you can run it from the command line — passing the disired IP_ADDR and PORT as command line arguments:
+If the app is already built, you can just run it from the command line — passing the desired IP_ADDR and PORT as command line arguments:
 
 ```
 > cd bin/
 > ./SkeletonTracker.exe 127.0.0.1 12345
 ```
 
-**THIS STILL NEEDS TO BE TESTED WITH THE RECEIVER APP**
+**NOTE: THIS STILL NEEDS TO BE TESTED WITH THE RECEIVER APP**
 
 ### Calibrate the Sensor
 
@@ -204,7 +204,7 @@ Second, you can toggle streaming data ON and OFF using `Stream Bodies` button to
 
 ![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_params_streaming.png)
 
-#### Keypressed Cheat Sheet
+### Keypressed Cheat Sheet
 
 `G`:
 Toggles hiding the GUI and Fullscreen Mode

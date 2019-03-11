@@ -1,12 +1,14 @@
 # SkeletonTracker
 An openFrameworks app that tracks and broadcasts skeletal data from a  Microsoft Kinect (V2)
 
-- [Basic Usage and Limitations]()
+- [Basic Usage and Limitations](#basic-use-and-limitations)
 - [Getting Started]()
     - [Building From Scratch]()
     - [Setting Up the Project]()
-- [Running the Exe]()
-
+- [Running the App]()
+    - [Calibrating the Sensor]()
+    - [Using the GUI]()
+    - [Keypressed Cheat Sheet]()
 
 ## Basic Use and Limitations
 Tested with: 
@@ -187,7 +189,9 @@ These values are saved on exit in the _bin/data/settings.xml_ file. You can manu
 
 ### Using the GUI
 
-There are a few useful things to point out in the GUI. First, hitting the `Save` icon in the top right writes out the current parameters to a settings file in  _bin/data/settings.xml_ file.
+There are a few useful things to point out in the GUI. 
+
+First, hitting the `Save` icon in the top right writes out the current parameters to a settings file in  _bin/data/settings.xml_ file.
 
 Second, you can toggle streaming data ON and OFF using `Stream Bodies` button towards the top.
 

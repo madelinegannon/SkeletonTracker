@@ -124,6 +124,8 @@ Once you have the basic components installed on your computer, follow these inst
 
    **DO NOT** add ofxKinectForWindows2 yet ... we'll do that next manually.
 
+   Hit `Update` and `Open in IDE` to bring up the MSVS solution.
+
 2. Add `ofxKinectForWindows2` project dependency to your solution.
     
     Follow the _Usage_ instructions from the [ofxKinectForWindows2 README](https://github.com/elliotwoods/ofxKinectForWindows2) to properly add the addon:
@@ -134,11 +136,17 @@ Once you have the basic components installed on your computer, follow these inst
 
     - Go back to Solution Explorer, right click on your project (e.g. 'mySketch') and select '_Add Reference..._', and add a reference to `ofxKinectForWindows2Lib`.
 
+    - In _Project Properties > C/C++ > General > Additional Include Directories_, add the following:
+
+    ```
+    $(KINECTSDK20_DIR)\inc;..\..\..\addons\ofxKinectForWindows2\src
+    ```
+
 3. Add `protobuf` to the solution.
 
-    In Property Manager (open it from _View -> Other Windows -> Property Manager_), right click on your project to select _Add Existing Property Sheet..._ and select the `SkeletalTracker.props` file.
+    ~~In Property Manager (open it from _View -> Other Windows -> Property Manager_), right click on your project to select _Add Existing Property Sheet..._ and select the `SkeletalTracker.props` file.~~ Not working properly yet.
 
-    In _Project Properties > C/C++ > General > Additional Include Directories_ add the following: 
+    In _Project Properties > C/C++ > General > Additional Include Directories_, add the following: 
 
     ```
     $(VCPKG)\installed\x64-windows\tools\protobuf\body;$(VCPKG)\installed\x64-windows\include;$(VCPKG)\installed\x64-windows\include\google;$(VCPKG)\installed\x64-windows\include\google\protobuf;$(VCPKG)\installed\x64-windows\include\google\protobuf\compiler;$(VCPKG)\installed\x64-windows\include\google\protobuf\compiler\cpp;$(VCPKG)\installed\x64-windows\include\google\protobuf\io;$(VCPKG)\installed\x64-windows\include\google\protobuf\stubs;$(VCPKG)\installed\x64-windows\include\google\protobuf\util

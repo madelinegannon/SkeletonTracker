@@ -40,6 +40,8 @@ Follow these instructions when setting up on a new machine:
 
     1. Verify successful installation by plugging your sensor into a USB 3.0 port and running the SDK's `Kinect Studio v2.0` app. Under the `MONITOR` tab, click the icon at the top left to toggle _Connected / Not Connected_.
 
+    ![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_kinect-sdk.PNG)
+
 5. [Download](https://openframeworks.cc/download/older/), [Install](https://openframeworks.cc/setup/vs/), and [Build](https://openframeworks.cc/learning/01_basics/how_to_add_addon_to_project/) **openFrameworks v0.9.8**.
 
 6. Clone the required addons in your `OF_PATH/addons` folder.
@@ -179,9 +181,11 @@ Set up your Kinect on a tripod or stable surface about 1 to 1.5 meters away from
 
 This app uses a sophisticated and highly-technical calibration routine to ensure the sensor is properly mapped to a robot's coordinate system: in the app, you use the GUI and the _Sensor_Params_ sliders to roughly adjust the {X, Y, Z} and Tilt directions of the sensor. 
 
+![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_params_sensor-offset.gif)
+
 These values are saved on exit in the _bin/data/settings.xml_ file. You can manually adjust the values in this file, and then restart the app for finer numeric control.
 
-
+![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_params_streaming.png)
 
 #### Keypressed Cheat Sheet
 

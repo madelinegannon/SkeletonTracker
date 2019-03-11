@@ -134,7 +134,7 @@ Once you have the basic components installed on your computer, follow these inst
 
     - Go back to Solution Explorer, right click on your project (e.g. 'mySketch') and select '_Add Reference..._', and add a reference to `ofxKinectForWindows2Lib`.
 
-3. Add the `body` proto to the solution.
+3. Add `protobuf` to the solution.
 
     In _Project Properties > C/C++ > General > Additional Include Directories_ add the following: 
 

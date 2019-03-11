@@ -144,9 +144,9 @@ Once you have the basic components installed on your computer, follow these inst
 
 3. Add `protobuf` to the solution.
 
-    ~~In Property Manager (open it from _View -> Other Windows -> Property Manager_), right click on your project to select _Add Existing Property Sheet..._ and select the `SkeletalTracker.props` file.~~ Not working properly yet.
+    ~~In Property Manager (open it from _View -> Other Windows -> Property Manager_), right click on your project to select _Add Existing Property Sheet..._ and select the `SkeletalTracker.props` file.~~ ... Not working properly yet :(
 
-    In _Project Properties > C/C++ > General > Additional Include Directories_, add the following: 
+    In your project's _Project Properties > C/C++ > General > Additional Include Directories_, add the following: 
 
     ```
     $(VCPKG)\installed\x64-windows\tools\protobuf\body;$(VCPKG)\installed\x64-windows\include;$(VCPKG)\installed\x64-windows\include\google;$(VCPKG)\installed\x64-windows\include\google\protobuf;$(VCPKG)\installed\x64-windows\include\google\protobuf\compiler;$(VCPKG)\installed\x64-windows\include\google\protobuf\compiler\cpp;$(VCPKG)\installed\x64-windows\include\google\protobuf\io;$(VCPKG)\installed\x64-windows\include\google\protobuf\stubs;$(VCPKG)\installed\x64-windows\include\google\protobuf\util
@@ -155,20 +155,47 @@ Once you have the basic components installed on your computer, follow these inst
     In _Project Properties > C/C++ > Linker > Input > Additional Dependencies_ add the following:
 
     ```
-    $(VCPKG)\installed\x64-windows\lib\libprotobuf.lib
+    $(VCPKG)/installed/x64-windows/lib/libprotobuf.lib
     ```
 
     In the Solution Explorer, right click on the project and select '_Add Existing Item..._'. 
 
     - Add the `body.pb.cc` and `body.pb.h` files from the `C:\vcpkg\installed\protobuf\x64-windows\tools\protobuf\body` directory.
 
-    Copy _libprotobuf.dll_ from `C:\vcpkg\installed\protobuf\x64-windows\bin` to the project directory that containing the .exe:
+    Copy _libprotobuf.dll_ from `$(VCPKG)/installed/protobuf/x64-windows/bin` to the project directory that containing the .exe:
 
     ```
-    > cp \vcpkg\installed\x64-windows\tools\protobuf\libprotobuf.dll ~/path/to/repo/SkeletonTracker/bin
+    > cp ~/vcpkg/installed/x64-windows/tools/protobuf/libprotobuf.dll ~/path/to/repo/SkeletonTracker/bin
     ```
 
 4. At this point, you should see no linker or include errors in your MSVS solution. If that's not the case, double check your Project Properties file names.
 
 
-### Running the App
+## Running the App
+
+### Calibrate the Sensor
+
+Set up your Kinect on a tripod or stable surface about 1 to 1.5 meters away from your desired Interaction Zone.
+
+This app uses a sophisticated and highly-technical calibration routine to ensure the sensor is properly mapped to a robot's coordinate system: in the app, you use the GUI and the _Sensor_Params_ sliders to roughly adjust the {X, Y, Z} and Tilt directions of the sensor. 
+
+These values are saved on exit in the _bin/data/settings.xml_ file. You can manually adjust the values in this file, and then restart the app for finer numeric control.
+
+
+
+#### Keypressed Cheat Sheet
+
+`G`:
+Toggles the GUI and Fullscreen Mode
+
+`1`:
+Show TOP VIEW
+
+`2`:
+Show FRONT VIEW
+
+`3`:
+Show SIDE VIEW
+
+`4`:
+Show PERSPECTIVE VIEW

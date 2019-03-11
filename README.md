@@ -136,6 +136,8 @@ Once you have the basic components installed on your computer, follow these inst
 
 3. Add `protobuf` to the solution.
 
+    In Property Manager (open it from _View -> Other Windows -> Property Manager_), right click on your project to select _Add Existing Property Sheet..._ and select the `SkeletalTracker.props` file.
+
     In _Project Properties > C/C++ > General > Additional Include Directories_ add the following: 
 
     ```

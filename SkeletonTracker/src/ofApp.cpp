@@ -3,6 +3,12 @@
 //--------------------------------------------------------------
 void ofApp::setup() {
 
+	// test argument passing
+	cout << "NUM args: " << args.size() << endl;
+	for (auto s : args) {
+		cout << s << endl;
+	}
+
 	setup_gui();
 
 	setup_sensor();
@@ -876,7 +882,19 @@ void ofApp::update_robot_targets()
 //-------------------------------------------------------------
 void ofApp::setup_client()
 {
-	client.setup();
+	if (args.size() == 3) {
+		cout << "Getting CMD input {"<< args[1] << ":" << args[2] << "}" << endl;
+		
+		string ip_addr = args[1];
+		int port;
+		sscanf(args[2].c_str(), "%d", &port);
+		
+		client.setup(ip_addr, port);
+	}
+	else {
+		// default setup: 127.0.0.1, 11310
+		client.setup("127.0.0.1", 11310);
+	}
 
 	default_body.InitAsDefaultInstance();
 	default_body.set_interaction_mode(Body_InteractionMode_FOLLOW);

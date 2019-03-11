@@ -2,13 +2,13 @@
 An openFrameworks app that tracks and broadcasts skeletal data from a  Microsoft Kinect (V2)
 
 - [Basic Usage and Limitations](#basic-use-and-limitations)
-- [Getting Started]()
-    - [Building From Scratch]()
-    - [Setting Up the Project]()
-- [Running the App]()
-    - [Calibrating the Sensor]()
-    - [Using the GUI]()
-    - [Keypressed Cheat Sheet]()
+- [Getting Started](#getting-started)
+    - [Building From Scratch](#building-from-scratch)
+    - [Setting Up the Project](#setting-up-the-project)
+- [Running the App](#running-the-app)
+    - [Calibrate the Sensor](#calibrate-the-sensor)
+    - [Using the GUI](#using-the-gui)
+    - [Keypressed Cheat Sheet](#keypressed-cheat-sheet)
 
 ## Basic Use and Limitations
 Tested with: 
@@ -22,8 +22,6 @@ Required openframeworks addons:
 - [ofxOneEuroFilter](https://github.com/i-n-g-o/ofxOneEuroFilter)
 - ofxNetwork
 - ofxGui
-
-#### Basic Controls and Usage
 
 #### Limitations
 
@@ -177,11 +175,22 @@ Once you have the basic components installed on your computer, follow these inst
 
 ## Running the App
 
+If the app is already built, you can run it from the command line — passing the disired IP_ADDR and PORT as command line arguments:
+
+```
+> cd bin/
+> ./SkeletonTracker.exe 127.0.0.1 12345
+```
+
+**THIS STILL NEEDS TO BE TESTED WITH THE RECEIVER APP**
+
 ### Calibrate the Sensor
 
 Set up your Kinect on a tripod or stable surface about 1 to 1.5 meters away from your desired Interaction Zone.
 
 This app uses a sophisticated and highly-technical calibration routine to ensure the sensor is properly mapped to a robot's coordinate system: in the app, you use the GUI and the _Sensor_Params_ sliders to roughly adjust the {X, Y, Z} and Tilt directions of the sensor. 
+
+Units are in `METERS`.
 
 ![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_params_sensor-offset.gif)
 

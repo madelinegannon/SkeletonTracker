@@ -3,6 +3,13 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(KINECTSDK20_DIR)\inc;..\..\..\addons\ofxKinectForWindows2\src;..\..\..\addons\ofxGui\src;..\..\..\addons\ofxNetwork\src;..\..\..\addons\ofxOsc\libs;..\..\..\addons\ofxOsc\libs\oscpack;..\..\..\addons\ofxOsc\libs\oscpack\src;..\..\..\addons\ofxOsc\libs\oscpack\src\ip;..\..\..\addons\ofxOsc\libs\oscpack\src\ip\posix;..\..\..\addons\ofxOsc\libs\oscpack\src\ip\win32;..\..\..\addons\ofxOsc\libs\oscpack\src\osc;\..\..\..\addons\ofxOsc\src;..\..\..\addons\ofxOneEuroFilter\src;$(VCPKG)\installed\x64-windows\tools\protobuf\body;$(VCPKG)\installed\x64-windows\include;$(VCPKG)\installed\x64-windows\include\google;$(VCPKG)\installed\x64-windows\include\google\protobuf;$(VCPKG)\installed\x64-windows\include\google\protobuf\compiler;$(VCPKG)\installed\x64-windows\include\google\protobuf\compiler\cpp;$(VCPKG)\installed\x64-windows\include\google\protobuf\io;$(VCPKG)\installed\x64-windows\include\google\protobuf\stubs;$(VCPKG)\installed\x64-windows\include\google\protobuf\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>$(VCPKG)\installed\x64-windows\lib\libprotobuf.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

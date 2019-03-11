@@ -9,7 +9,6 @@
 
 
 
-static int PORT = 11310;
 
 using namespace srl::body;
 
@@ -22,6 +21,7 @@ public:
     Body* body_message;
     bool has_new_message = false;
     
+	int PORT = 11310;
     
     void setup(){
         
@@ -38,11 +38,21 @@ public:
         start();
     }
     
-    void setup(const char ip_addr, int port, bool set_non_blocking=false){
+    void setup(string ip_addr, int _port, bool set_non_blocking=false){
+
+		cout << "Command Line Input for {IP_ADDR:PORT}: {" << ofToString(ip_addr) << ":" << ofToString(_port) << "}" << endl;
+
+		PORT = _port;
+
         udpConnection.Create();
         udpConnection.SetNonBlocking(set_non_blocking);
-        udpConnection.Connect(&ip_addr, port);
+        udpConnection.Connect(ip_addr.c_str(), PORT);
         isInitialized = true;
+
+		body_message = new Body();
+		body_message->InitAsDefaultInstance();
+
+		start();
     }
 
     void update_message(Body* body){

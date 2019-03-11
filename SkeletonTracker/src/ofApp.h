@@ -23,6 +23,8 @@ class ofApp : public ofBaseApp{
 
 		void keyPressed(int key);
 
+		vector<string> args;
+
 		// ---------- SENSOR SETUP -----------
 		void setup_sensor();
 		void update_sensor();

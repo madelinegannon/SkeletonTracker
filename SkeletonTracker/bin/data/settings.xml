@@ -1,0 +1,23 @@
+<Debug_View>
+	<Show_Skeletons>1</Show_Skeletons>
+	<Show_Mesh>0</Show_Mesh>
+	<Use_World_Coords>1</Use_World_Coords>
+	<Stream_Bodies>1</Stream_Bodies>
+	<Sensor_Params>
+		<Offset>-1, -0.0412328, 0.614744</Offset>
+		<Tilt>-11.9388</Tilt>
+	</Sensor_Params>
+	<Interaction_Params>
+		<Idle>1</Idle>
+		<Mirror>0</Mirror>
+		<Avoid>0</Avoid>
+		<R_Bounds_Min>-0.5, -0.8, 0</R_Bounds_Min>
+		<R_Bounds_Max>1, 0.8, 0.9</R_Bounds_Max>
+	<Other>0</Other>
+	<Interaction_Zone_Offset>0.583923, 0.0216577, 0</Interaction_Zone_Offset>
+	<Crouch_Dist_Min>0.346939</Crouch_Dist_Min>
+		<Crouch_Dist_Max>0.77551</Crouch_Dist_Max>
+	<Show_Crouch>1</Show_Crouch>
+	</Interaction_Params>
+<Debug_View/>
+</Debug_View>

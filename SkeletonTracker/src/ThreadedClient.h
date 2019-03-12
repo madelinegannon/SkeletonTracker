@@ -112,11 +112,14 @@ public:
         
         string messageBuffer;
         body->SerializeToString(&messageBuffer);
-        //cout << "sending body " << ofToString(body->id()) << " to server ... buffer size {" << messageBuffer.length() << "}" << endl;
-        auto n = udpConnection.Send(messageBuffer.c_str(), messageBuffer.length());
-        if (n < 0) {
-            ofLogError() << "error while sending message" << endl;
-        }
+        //cout << "sending body " << ofToString(body->id()) << " to server ... buffer size {" << messageBuffer.length() << "}" << endl;       
+		if (messageBuffer.length() > 2) { // if it's not the default body, broadcast out
+			auto n = udpConnection.Send(messageBuffer.c_str(), messageBuffer.length());
+			if (n < 0) {
+				ofLogError() << "error while sending message" << endl;
+			}
+		}
+		
     }
     
     

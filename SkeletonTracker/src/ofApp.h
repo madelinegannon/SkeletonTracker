@@ -7,6 +7,7 @@
 #include "ofxGui.h"
 #include "ThreadedClient.h"
 #include "FilteredPoint.h"
+#include "ofxOsc.h"
 
 #include "body.pb.h"
 
@@ -20,10 +21,20 @@ class ofApp : public ofBaseApp{
 		void update();
 		void draw();
 		void exit();
-
 		void keyPressed(int key);
 
-		vector<string> args;
+
+		// ip_addr and port for broadcasting data
+		vector<string> args; 
+		bool load_params_from_file = true;
+
+		// ------------ GTC 2019 -------------
+		ofBoxPrimitive interaction_zone;
+		float crouch_scalar = 1;
+		ofxOscSender sender;
+		void setup_osc();
+
+		 
 
 		// ---------- SENSOR SETUP -----------
 		void setup_sensor();
@@ -34,19 +45,19 @@ class ofApp : public ofBaseApp{
 		void setup_world();
 		void draw_world();
 		ofEasyCam cam;
-		ofMesh mirror_plane;
-		float mirror_plane_width = 3;
-		float mirror_plane_height = 2;
+		//ofMesh mirror_plane;
+		//float mirror_plane_width = 3;
+		//float mirror_plane_height = 2;
 
 		void setup_shader();
 		//void render_shader(); // <-- can't be rendered outside of draw() function for some reason ???
 		ofShader shader;
 
 		// ---------- YuMi PARAMS ------------
-		FilteredPoint fp_tgt_left, fp_tgt_right;
-		ofNode target_left, target_right;
-		ofCylinderPrimitive arm_left, arm_right;
-		ofSpherePrimitive hand_sphere_left, hand_sphere_right;
+		//FilteredPoint fp_tgt_left, fp_tgt_right;
+		//ofNode target_left, target_right;
+		//ofCylinderPrimitive arm_left, arm_right;
+		//ofSpherePrimitive hand_sphere_left, hand_sphere_right;
 
 		void update_bodies();
 		void update_body(ofxKinectForWindows2::Data::Body _body);
@@ -63,6 +74,8 @@ class ofApp : public ofBaseApp{
 		void update_robot_targets();
 		Body* closest_body;
 		Body default_body;
+
+		
 
 		// --------------- COM ---------------
 		void setup_client();
@@ -83,19 +96,24 @@ class ofApp : public ofBaseApp{
 		ofParameter<float> sensor_tilt;
 
 		ofParameterGroup params_interaction;
-		ofParameter<bool> follow, mirror, avoid;
-		ofParameter<ofVec3f> mirror_plane_offset;
-		ofParameter<ofVec3f> robot_bounds_min;
-		ofParameter<ofVec3f> robot_bounds_max;
-		ofBoxPrimitive robot_bounds;
+		ofParameter<bool> idle, mirror, avoid, other;
+		ofParameter<ofVec3f> interaction_zone_offset;
+		ofParameter<float> crouch_dist_min;
+		ofParameter<float> crouch_dist_max;
+		ofParameter<bool> show_crouch;
+		//ofParameter<ofVec3f> robot_bounds_min;
+		//ofParameter<ofVec3f> robot_bounds_max;
+		//ofBoxPrimitive robot_bounds;
 
-		ofBoxPrimitive avoid_zone, mirror_zone;
+		//ofBoxPrimitive avoid_zone, mirror_zone;
 
-		void listener_follow(bool &val);
+		void listener_idle(bool &val);
 		void listener_mirror(bool &val);
 		void listener_avoid(bool &val);
-		void listener_mirror_plane_offset(ofVec3f &val);
-		void listener_robot_bounds(ofVec3f &val);
+		void listener_other(bool &val);
+		void listener_interaction_zone_offset(ofVec3f &val);
+		//void listener_mirror_plane_offset(ofVec3f &val);
+		//void listener_robot_bounds(ofVec3f &val);
 
 	private:
 

@@ -4,10 +4,10 @@
 void ofApp::setup() {
 
 	// test argument passing
-	cout << "NUM args: " << args.size() << endl;
-	for (auto s : args) {
-		cout << s << endl;
-	}
+	//cout << "NUM args: " << args.size() << endl;
+	//for (auto s : args) {
+	//	cout << s << endl;
+	//}
 
 	setup_gui();
 
@@ -17,6 +17,7 @@ void ofApp::setup() {
 
 	setup_world();
 
+	setup_osc();
 	setup_client();
 }
 
@@ -26,14 +27,15 @@ void ofApp::update() {
 	update_sensor();
 
 	update_bodies();
-
+	bool is_crouching = false;
 	if (bodies.size() > 0) {
 		update_closest_body();
 
 		// check if the closest body is within interaction range
 		ofVec3f head = toOf(closest_body->mutable_joints(HEAD)->mutable_pose()).getGlobalPosition();
-		if (isInside(head, mirror_zone) || isInside(head, avoid_zone)){
+		if (isInside(head, interaction_zone)){
 			generate_robot_targets();
+			is_crouching = true;
 		}
 		// send an empty body
 		else {
@@ -48,15 +50,31 @@ void ofApp::update() {
 	client.update_message(closest_body);
 
 
-	// SEND THE FIRST BODY IN THE BODY MAP ... (NEEDS TO BE SMARTER)
-	//map<int, Body*>::iterator it;
-	//int i = 0;
-	//for (it = bodies.begin(); it != bodies.end(); it++) {
-	//	//if (i==0){//it->second->ACTIVE) {
-	//		client.update_message(it->second);
-	//	//}
-	//	i++;
-	//}
+	// get the crouch percentage of the closest body
+	if (is_crouching) {
+		ofVec3f head = toOf(closest_body->mutable_joints(HEAD)->mutable_pose()).getGlobalPosition();
+		ofVec3f butt = toOf(closest_body->mutable_joints(SPINE_BASE)->mutable_pose()).getGlobalPosition();
+
+		// make Z height from FLOOR, not ORIGIN
+		float floor_dist = 2 * .254;
+
+		float min = crouch_dist_min;
+		float max = MAX(crouch_dist_max, butt.distance(head));
+		//cout << "distance from butt to ground: " << (butt.z + floor_dist) << endl;
+		//cout << "distance from head to butt: " << butt.distance(head) << endl;
+		//cout << "\tmin: "<<min<< ", max: " << max<<", crouch_scalar: " << crouch_scalar << endl;
+		
+		
+		crouch_scalar = ofMap(butt.z+floor_dist, min, max, 0, 1, true);
+		
+		if (do_streaming) {
+			ofxOscMessage msg;
+			msg.setAddress("/crouch_scalar");
+			msg.addFloatArg(crouch_scalar);
+			sender.sendMessage(msg);
+		}
+
+	}
 
 }
 
@@ -154,6 +172,45 @@ void ofApp::draw() {
 		ofDrawBitmapString(ss.str(), 10, ofGetHeight() - 15);
 
 		ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), ofGetWidth() - 55, 15);
+
+
+		// draw crouch visual debugger
+		if (show_crouch) {
+
+			ofPushStyle();
+			float w = 200;
+			float h = 100;
+			float padding = 10;
+
+			ofPushMatrix();
+			ofTranslate(panel.getPosition().x, panel.getPosition().y + panel.getHeight() + padding);
+			ofSetColor(120);
+			ofFill();
+			ofDrawRectangle(0, 0, w, h);
+			ofSetColor(60);
+			ofDrawRectangle(padding/2, padding / 2, w-padding, 25);
+			ofSetColor(0);
+			ofDrawRectangle(padding / 2, 25, w - padding, h - padding - 20);
+			ofSetLineWidth(5);
+			ofVec2f start = ofVec2f(2*padding, h / 2);
+			ofVec2f end = ofVec2f(w-2*padding, h / 2);
+			ofSetColor(120);
+			ofDrawLine(start, end);
+			ofSetColor(ofColor::orange);
+			ofVec3f lerp = start.getInterpolated(end, crouch_scalar);
+			ofDrawEllipse(lerp, 20, 20);
+			ofSetColor(255);
+			ofDrawBitmapString("Crouch Visualizer", padding, 2*padding);
+			ofSetLineWidth(1);
+			ofDrawLine(lerp.x, lerp.y + 4 * padding, lerp.x, lerp.y );
+			ofDrawBitmapStringHighlight(ofToString(crouch_scalar), lerp.x, lerp.y + 4*padding);
+			ofDrawBitmapString("0", start.x, start.y + 2*padding);
+			ofDrawBitmapString("1", end.x, end.y + 2*padding);
+			ofPopMatrix();
+			
+			ofPopStyle();
+
+		}
 	}
 
 }
@@ -162,6 +219,8 @@ void ofApp::draw() {
 void ofApp::exit() {
 	// Optional:  Delete all global objects allocated by libprotobuf.
 	google::protobuf::ShutdownProtobufLibrary();
+
+	panel.saveToFile("settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -187,11 +246,34 @@ void ofApp::keyPressed(int key) {
 		break;
 	case 'i':
 	case 'I':
-		listener_follow(val);
+		listener_idle(val);
+		break;
+	case 'o':
+	case 'O':
+		listener_other(val);
 		break;
 	default:
 		handle_keypressed_cam(key);
 	}
+}
+
+//--------------------------------------------------------------
+void ofApp::setup_osc(){
+	string ip_addr = "127.0.0.1";
+	int port = 55555;
+
+	// if we have incoming args, override the default ip address and port
+	if (args.size() == 3) {
+		cout << "Getting CMD input {" << args[1] << ":" << args[2] << "}" << endl;
+
+		ip_addr = args[1];
+		sscanf(args[2].c_str(), "%d", &port);
+		
+		port;
+	}
+
+	cout << "Setup OSC COMs at {" << ip_addr << ":" << ofToString(port) << "}" << endl;
+	sender.setup(ip_addr, port);
 }
 
 //--------------------------------------------------------------
@@ -213,56 +295,85 @@ void ofApp::update_sensor()
 //--------------------------------------------------------------
 void ofApp::setup_world()
 {
-	// mirror_plane width and height is in Meters
-	mirror_plane.setMode(OF_PRIMITIVE_TRIANGLES);
-	mirror_plane.addVertex(ofPoint(0, -mirror_plane_width / 2.,  mirror_plane_height / 2.));
-	mirror_plane.addVertex(ofPoint(0, -mirror_plane_width / 2., -mirror_plane_height / 2.));
-	mirror_plane.addVertex(ofPoint(0,  mirror_plane_width / 2., -mirror_plane_height / 2.));
-	mirror_plane.addVertex(ofPoint(0,  mirror_plane_width / 2.,  mirror_plane_height / 2.));
+	ofVec3f val = interaction_zone_offset;
 
-	mirror_plane.addIndex(0);
-	mirror_plane.addIndex(1);
-	mirror_plane.addIndex(2);
+	float i_zone_width = 2;
+	float i_zone_depth = 2.5;
+	float i_zone_height = 2;
+	ofVec3f i_zone_centroid = ofVec3f(i_zone_width / 2 + val.x, 0 + val.y, i_zone_depth / 2 - 2 * .254 + val.z);
 
-	mirror_plane.addIndex(2);
-	mirror_plane.addIndex(0);
-	mirror_plane.addIndex(3);
+	interaction_zone.setGlobalPosition(i_zone_centroid);
+	interaction_zone.setWidth(i_zone_width);
+	interaction_zone.setHeight(i_zone_height);
+	interaction_zone.setDepth(i_zone_depth);
 
-	listener_mirror_plane_offset(ofPoint(mirror_plane_offset.get().x, mirror_plane_offset.get().y, mirror_plane_offset.get().z));
 
-	// the robot_bounds is in Meters
-	robot_bounds.setGlobalPosition((robot_bounds_min.get() + robot_bounds_max.get()) / 2);
-	robot_bounds.setWidth(robot_bounds_max.get().x - robot_bounds_min.get().x);		// X Dim
-	robot_bounds.setHeight(robot_bounds_max.get().y - robot_bounds_min.get().y);	// Y Dim
-	robot_bounds.setDepth(robot_bounds_max.get().z - robot_bounds_min.get().z);		// Z Dim
-
-	// setup the filtered points for left and right targets
-	fp_tgt_left.setup();
-	fp_tgt_right.setup();
-	// add the fp_tgts to the gui
-	panel.add(fp_tgt_left.get_gui());
-	panel.add(fp_tgt_right.get_gui());
-
-	// setup avoidance cylinders
-	arm_left.set(.050, .100, true);
-	arm_left.setResolutionRadius(25);
-	arm_right.set(.050, .100, true);
-	arm_right.setResolutionRadius(25);
-
-	// setup avoidance spheres
-	hand_sphere_left.set(.1, 10);
-	hand_sphere_right.set(.1, 10);
+	//	robot_bounds.setGlobalPosition((robot_bounds_min.get() + robot_bounds_max.get()) / 2);
+//	robot_bounds.setWidth(robot_bounds_max.get().x - robot_bounds_min.get().x);		// X Dim
+//	robot_bounds.setHeight(robot_bounds_max.get().y - robot_bounds_min.get().y);	// Y Dim
+//	robot_bounds.setDepth(robot_bounds_max.get().z - robot_bounds_min.get().z);	
 
 	// setup camera defaults
 	cam.setFarClip(9999);
 	cam.setNearClip(1);
 	cam.setDistance(5000);
-	bool val = true;
-	listener_show_perspective(val);
-
-	// setup avoid zone inside the robot bounds listener
-	listener_robot_bounds(ofPoint(robot_bounds_max.get()));
+	bool flag = true;
+	listener_show_perspective(flag);
 }
+
+//--------------------------------------------------------------
+//void ofApp::setup_world()
+//{
+//	// mirror_plane width and height is in Meters
+//	mirror_plane.setMode(OF_PRIMITIVE_TRIANGLES);
+//	mirror_plane.addVertex(ofPoint(0, -mirror_plane_width / 2.,  mirror_plane_height / 2.));
+//	mirror_plane.addVertex(ofPoint(0, -mirror_plane_width / 2., -mirror_plane_height / 2.));
+//	mirror_plane.addVertex(ofPoint(0,  mirror_plane_width / 2., -mirror_plane_height / 2.));
+//	mirror_plane.addVertex(ofPoint(0,  mirror_plane_width / 2.,  mirror_plane_height / 2.));
+//
+//	mirror_plane.addIndex(0);
+//	mirror_plane.addIndex(1);
+//	mirror_plane.addIndex(2);
+//
+//	mirror_plane.addIndex(2);
+//	mirror_plane.addIndex(0);
+//	mirror_plane.addIndex(3);
+//
+//	listener_mirror_plane_offset(ofPoint(mirror_plane_offset.get().x, mirror_plane_offset.get().y, mirror_plane_offset.get().z));
+//
+//	// the robot_bounds is in Meters
+//	robot_bounds.setGlobalPosition((robot_bounds_min.get() + robot_bounds_max.get()) / 2);
+//	robot_bounds.setWidth(robot_bounds_max.get().x - robot_bounds_min.get().x);		// X Dim
+//	robot_bounds.setHeight(robot_bounds_max.get().y - robot_bounds_min.get().y);	// Y Dim
+//	robot_bounds.setDepth(robot_bounds_max.get().z - robot_bounds_min.get().z);		// Z Dim
+//
+//	// setup the filtered points for left and right targets
+//	fp_tgt_left.setup();
+//	fp_tgt_right.setup();
+//	// add the fp_tgts to the gui
+//	//panel.add(fp_tgt_left.get_gui());
+//	//panel.add(fp_tgt_right.get_gui());
+//
+//	// setup avoidance cylinders
+//	arm_left.set(.050, .100, true);
+//	arm_left.setResolutionRadius(25);
+//	arm_right.set(.050, .100, true);
+//	arm_right.setResolutionRadius(25);
+//
+//	// setup avoidance spheres
+//	hand_sphere_left.set(.1, 10);
+//	hand_sphere_right.set(.1, 10);
+//
+//	// setup camera defaults
+//	cam.setFarClip(9999);
+//	cam.setNearClip(1);
+//	cam.setDistance(5000);
+//	bool val = true;
+//	listener_show_perspective(val);
+//
+//	// setup avoid zone inside the robot bounds listener
+//	listener_robot_bounds(ofPoint(robot_bounds_max.get()));
+//}
 
 //--------------------------------------------------------------
 void ofApp::draw_world()
@@ -276,17 +387,17 @@ void ofApp::draw_world()
 	ofPlanePrimitive floor;
 	floor.set(7, 5);
 	ofPushMatrix();
-	ofTranslate(0, 0, -.76);
+	ofTranslate(0, 0, -2 * .254);
 	ofFill();
 	ofSetColor(100, 100);
 	floor.draw();
 	ofPopMatrix();
 
-	// draw the table
-	float table_w = 1.2;
-	float table_h = 4;
-	float table_d = .1;
-	ofVec3f table_centroid = ofVec3f(-.4, 0, -table_d/2);
+	// draw the stage
+	float table_w = 6 * .254;
+	float table_h = 8 * .254;
+	float table_d = 2 * .254;
+	ofVec3f table_centroid = ofVec3f(-table_w/2, 0, -table_d/2);
 	ofSetColor(100, 100);
 	ofDrawBox(table_centroid, table_w, table_h, table_d);
 	ofNoFill();
@@ -303,79 +414,25 @@ void ofApp::draw_world()
 	draw_frustum();
 	ofPopMatrix();
 
-	// draw the AVOID ZONE
-	ofPlanePrimitive zone_avoid;
-	zone_avoid.set(robot_bounds_max.get().x, robot_bounds.getHeight());
-	ofPushMatrix();
-	ofTranslate(zone_avoid.getWidth()/2, 0, -.75);
-	ofFill();
-	ofSetColor(ofColor::orange, 100);
-	zone_avoid.draw();
-	ofNoFill();
-	ofSetLineWidth(3);
-	ofSetColor(ofColor::darkorange);
-	ofPopMatrix();
-	ofPushMatrix();
-	ofTranslate(0, -zone_avoid.getHeight() / 2, -.75);
-	ofDrawRectangle(0, 0, zone_avoid.getWidth(), zone_avoid.getHeight());
-	ofPopMatrix();
-	ofSetLineWidth(1);
-	avoid_zone.drawWireframe();
 
-	// draw the MIRROR ZONE
-	ofPlanePrimitive zone_mirror;
-	zone_mirror.set(1, mirror_zone.getHeight());
+	// draw the INTERACTION ZONE
+	ofPlanePrimitive zone_inter;
+	zone_inter.set(interaction_zone.getWidth(), interaction_zone.getHeight());
 	ofPushMatrix();
-	ofTranslate(zone_mirror.getWidth() / 2 + zone_avoid.getWidth(), 0, -.75);
+	ofTranslate(interaction_zone.getGlobalPosition().x, interaction_zone.getGlobalPosition().y, -table_d );
 	ofFill();
 	ofSetColor(ofColor::deepSkyBlue, 80);
-	zone_mirror.draw();
+	zone_inter.draw();
 	ofNoFill();
 	ofSetLineWidth(3);
 	ofSetColor(ofColor::deepSkyBlue);
 	ofPopMatrix();
 	ofPushMatrix();
-	ofTranslate(zone_avoid.getWidth(), -zone_mirror.getHeight() / 2, -.75);
-	ofDrawRectangle(0, 0, mirror_zone.getWidth(), mirror_zone.getHeight());
+	ofTranslate(interaction_zone.getGlobalPosition().x - interaction_zone.getWidth()/2, interaction_zone.getGlobalPosition().y - interaction_zone.getHeight()/2, -table_d);
+	ofDrawRectangle(0, 0, interaction_zone.getWidth(), interaction_zone.getHeight());
 	ofPopMatrix();
 	ofSetLineWidth(1);
-	mirror_zone.drawWireframe();
-
-	// draw the robot bounds
-	ofSetLineWidth(1);
-	ofNoFill();
-	ofSetColor(100);
-	robot_bounds.drawWireframe();
-
-	if (mirror) {
-		// show the left and right robot targets
-		ofSetColor(ofColor::greenYellow, 100);
-		ofDrawBox(target_left.getGlobalPosition(), .05);
-		ofSetColor(ofColor::blueSteel, 100);
-		ofDrawBox(target_right.getGlobalPosition(), .05);
-
-		// show the filtered targets
-		fp_tgt_left.draw();
-		fp_tgt_right.draw();
-	}
-	else if (avoid) {
-
-		// visualize avoidance cylinders
-		ofSetColor(ofColor::greenYellow, 100);
-		//arm_left.drawWireframe();
-		hand_sphere_left.draw();
-		ofSetColor(ofColor::white, 20);
-		hand_sphere_left.drawWireframe();
-		ofSetColor(ofColor::blueSteel, 100);
-		//arm_right.drawWireframe();
-		hand_sphere_right.draw();
-		ofSetColor(ofColor::white, 20);
-		hand_sphere_right.drawWireframe();
-
-		// show the left and right robot targets
-
-		// show filtered targets
-	}
+	interaction_zone.drawWireframe();
 
 
 	ofPopStyle();
@@ -421,7 +478,7 @@ void ofApp::update_body(ofxKinectForWindows2::Data::Body _body)
 		// ... I should also add a timestamp to the body proto here
 
 		// set interaction mode
-		if (follow)
+		if (idle)
 			body->set_interaction_mode(Body_InteractionMode_FOLLOW);
 		else if (mirror)
 			body->set_interaction_mode(Body_InteractionMode_MIRROR);
@@ -735,111 +792,111 @@ void ofApp::generate_robot_targets()
 	
 
 	bool update_rob_targets = false;
-	if (follow) {
+	if (idle) {
 
 	}
 	else if (mirror) {
-		// The user's left hand moves the robot's right hand,
-		// and the user's right hand moves the robot's left hand
+		//// The user's left hand moves the robot's right hand,
+		//// and the user's right hand moves the robot's left hand
 
-		ofVec3f left, right;
-		ofNode shoulder_right, shoulder_left;
-		
-		// the robot's left hand is the Person's right hand
-		hand_left = toOf(closest_body->mutable_joints(HAND_RIGHT)->mutable_pose());
-		hand_right = toOf(closest_body->mutable_joints(HAND_LEFT)->mutable_pose());
+		//ofVec3f left, right;
+		//ofNode shoulder_right, shoulder_left;
+		//
+		//// the robot's left hand is the Person's right hand
+		//hand_left = toOf(closest_body->mutable_joints(HAND_RIGHT)->mutable_pose());
+		//hand_right = toOf(closest_body->mutable_joints(HAND_LEFT)->mutable_pose());
 
-		if (isInside(hand_right.getGlobalPosition(), avoid_zone)) {
-			cout << " The Person's LEFT HAND is inside the AVOID ZONE" << endl;
-			// make the robot's end-effector move directly to that point
-			right.set(hand_right.getGlobalPosition());
-		}
-		// exaggerate the robot's movement to better match the person's pose
-		else {
-			// get the hand pose relative to the shoulder
-			shoulder_right = toOf(closest_body->mutable_joints(SHOULDER_LEFT)->mutable_pose());
-			ofVec3f shoulder_to_hand_right = shoulder_right.getGlobalPosition() - hand_right.getGlobalPosition();
-			// reflect for the robot's coords
-			shoulder_to_hand_right.y *= -1;
-			shoulder_to_hand_right.z *= -1;
-			// move from origin to robot's right shoulder
-			ofVec3f robot_shoulder_right = ofVec3f(.25, -.10, .45);
-			// add a little extra distance on the Y-Axis to exaggerate the robot's reach
-			float diff = shoulder_right.getGlobalPosition().y - hand_right.getGlobalPosition().y;
-			float scalar = ofMap(diff, -.2, 1, 0, 1); // don't clamp; let the values go +/-
-			robot_shoulder_right.y -= scalar;
-			// add the offset and set the raw target position
-			shoulder_to_hand_right += robot_shoulder_right;
-			right.set(shoulder_to_hand_right);
-		}
-		// check if the hands are inside the "avoid" zone
-		if (isInside(hand_left.getGlobalPosition(), avoid_zone)) {
-			cout << "\tThe Person's RIGHT HAND is inside the AVOID ZONE" << endl;
-			// make the robot's end-effector move directly to that point
-			left.set(hand_left.getGlobalPosition());
-		}
-		else {
-			shoulder_left = toOf(closest_body->mutable_joints(SHOULDER_RIGHT)->mutable_pose());
-			ofVec3f shoulder_to_hand_left = shoulder_left.getGlobalPosition() - hand_left.getGlobalPosition();
-			// reflect for the robot's coords
-			shoulder_to_hand_left.y *= -1;
-			shoulder_to_hand_left.z *= -1;
-			// move from origin to robot's left shoulder
-			ofVec3f robot_shoulder_left = ofVec3f(.25, .10, .45);
-			// add a little extra distance on the Y-Axis to exaggerate the robot's reach
-			float diff = hand_left.getGlobalPosition().y - shoulder_left.getGlobalPosition().y;
-			float scalar = ofMap(diff, -.2, 1, 0, 1); // don't clamp; let the values go +/-
-			robot_shoulder_left.y += scalar;
-			// add the offset and set the raw target position
-			shoulder_to_hand_left += robot_shoulder_left;
-			left.set(shoulder_to_hand_left);
-		}
-		 
+		//if (isInside(hand_right.getGlobalPosition(), avoid_zone)) {
+		//	cout << " The Person's LEFT HAND is inside the AVOID ZONE" << endl;
+		//	// make the robot's end-effector move directly to that point
+		//	right.set(hand_right.getGlobalPosition());
+		//}
+		//// exaggerate the robot's movement to better match the person's pose
+		//else {
+		//	// get the hand pose relative to the shoulder
+		//	shoulder_right = toOf(closest_body->mutable_joints(SHOULDER_LEFT)->mutable_pose());
+		//	ofVec3f shoulder_to_hand_right = shoulder_right.getGlobalPosition() - hand_right.getGlobalPosition();
+		//	// reflect for the robot's coords
+		//	shoulder_to_hand_right.y *= -1;
+		//	shoulder_to_hand_right.z *= -1;
+		//	// move from origin to robot's right shoulder
+		//	ofVec3f robot_shoulder_right = ofVec3f(.25, -.10, .45);
+		//	// add a little extra distance on the Y-Axis to exaggerate the robot's reach
+		//	float diff = shoulder_right.getGlobalPosition().y - hand_right.getGlobalPosition().y;
+		//	float scalar = ofMap(diff, -.2, 1, 0, 1); // don't clamp; let the values go +/-
+		//	robot_shoulder_right.y -= scalar;
+		//	// add the offset and set the raw target position
+		//	shoulder_to_hand_right += robot_shoulder_right;
+		//	right.set(shoulder_to_hand_right);
+		//}
+		//// check if the hands are inside the "avoid" zone
+		//if (isInside(hand_left.getGlobalPosition(), avoid_zone)) {
+		//	cout << "\tThe Person's RIGHT HAND is inside the AVOID ZONE" << endl;
+		//	// make the robot's end-effector move directly to that point
+		//	left.set(hand_left.getGlobalPosition());
+		//}
+		//else {
+		//	shoulder_left = toOf(closest_body->mutable_joints(SHOULDER_RIGHT)->mutable_pose());
+		//	ofVec3f shoulder_to_hand_left = shoulder_left.getGlobalPosition() - hand_left.getGlobalPosition();
+		//	// reflect for the robot's coords
+		//	shoulder_to_hand_left.y *= -1;
+		//	shoulder_to_hand_left.z *= -1;
+		//	// move from origin to robot's left shoulder
+		//	ofVec3f robot_shoulder_left = ofVec3f(.25, .10, .45);
+		//	// add a little extra distance on the Y-Axis to exaggerate the robot's reach
+		//	float diff = hand_left.getGlobalPosition().y - shoulder_left.getGlobalPosition().y;
+		//	float scalar = ofMap(diff, -.2, 1, 0, 1); // don't clamp; let the values go +/-
+		//	robot_shoulder_left.y += scalar;
+		//	// add the offset and set the raw target position
+		//	shoulder_to_hand_left += robot_shoulder_left;
+		//	left.set(shoulder_to_hand_left);
+		//}
+		// 
 
-		// clamp the z value to stay within the robot_bounds (Z only)
-		left.z = ofClamp(left.z, robot_bounds_min.get().z, robot_bounds_max.get().z);
-		right.z = ofClamp(right.z, robot_bounds_min.get().z, robot_bounds_max.get().z);
+		//// clamp the z value to stay within the robot_bounds (Z only)
+		//left.z = ofClamp(left.z, robot_bounds_min.get().z, robot_bounds_max.get().z);
+		//right.z = ofClamp(right.z, robot_bounds_min.get().z, robot_bounds_max.get().z);
 
-		// update the filtered point with the raw left and right values		
-		fp_tgt_left.update(left);
-		fp_tgt_right.update(right);
+		//// update the filtered point with the raw left and right values		
+		//fp_tgt_left.update(left);
+		//fp_tgt_right.update(right);
 
-		ofVec3f filtered_right = fp_tgt_right.get_filtered();
-		ofVec3f filtered_left = fp_tgt_left.get_filtered();
-		
-		// update the targets with filtered left and right poses
-		target_left.setGlobalPosition(filtered_left);
-		target_right.setGlobalPosition(filtered_right);
-		target_left.setGlobalOrientation(ofQuaternion(0, 0, 0, 1));
-		target_right.setGlobalOrientation(ofQuaternion(0, 0, 0, 1));
+		//ofVec3f filtered_right = fp_tgt_right.get_filtered();
+		//ofVec3f filtered_left = fp_tgt_left.get_filtered();
+		//
+		//// update the targets with filtered left and right poses
+		//target_left.setGlobalPosition(filtered_left);
+		//target_right.setGlobalPosition(filtered_right);
+		//target_left.setGlobalOrientation(ofQuaternion(0, 0, 0, 1));
+		//target_right.setGlobalOrientation(ofQuaternion(0, 0, 0, 1));
 
 
-		update_rob_targets = true;
+		//update_rob_targets = true;
 
 	}
 	else if (avoid) {
 
-		ofVec3f left, right;
+		//ofVec3f left, right;
 
-		// create avoidance spheres at the end of each hand
-		left = toOf(closest_body->mutable_joints(HAND_LEFT)->mutable_pose()).getGlobalPosition();
-		right = toOf(closest_body->mutable_joints(HAND_RIGHT)->mutable_pose()).getGlobalPosition();
+		//// create avoidance spheres at the end of each hand
+		//left = toOf(closest_body->mutable_joints(HAND_LEFT)->mutable_pose()).getGlobalPosition();
+		//right = toOf(closest_body->mutable_joints(HAND_RIGHT)->mutable_pose()).getGlobalPosition();
 
-		// update the filtered point with the left and right values
-		fp_tgt_left.update(left);
-		fp_tgt_right.update(right);
+		//// update the filtered point with the left and right values
+		//fp_tgt_left.update(left);
+		//fp_tgt_right.update(right);
 
-		// update spheres (for rendering purposes only) 
-		hand_sphere_left.setGlobalPosition(fp_tgt_left.get_filtered());
-		hand_sphere_right.setGlobalPosition(fp_tgt_right.get_filtered());
+		//// update spheres (for rendering purposes only) 
+		//hand_sphere_left.setGlobalPosition(fp_tgt_left.get_filtered());
+		//hand_sphere_right.setGlobalPosition(fp_tgt_right.get_filtered());
 
-		// update the targets with filtered left and right poses
-		target_left.setGlobalPosition(fp_tgt_left.get_filtered().x, fp_tgt_left.get_filtered().y, fp_tgt_left.get_filtered().z);
-		target_left.setGlobalOrientation(ofQuaternion(0,0,0,1));
-		target_right.setGlobalPosition(fp_tgt_right.get_filtered().x, fp_tgt_right.get_filtered().y, fp_tgt_right.get_filtered().z);
-		target_right.setGlobalOrientation(ofQuaternion(0, 0, 0, 1));
+		//// update the targets with filtered left and right poses
+		//target_left.setGlobalPosition(fp_tgt_left.get_filtered().x, fp_tgt_left.get_filtered().y, fp_tgt_left.get_filtered().z);
+		//target_left.setGlobalOrientation(ofQuaternion(0,0,0,1));
+		//target_right.setGlobalPosition(fp_tgt_right.get_filtered().x, fp_tgt_right.get_filtered().y, fp_tgt_right.get_filtered().z);
+		//target_right.setGlobalOrientation(ofQuaternion(0, 0, 0, 1));
 
-		update_rob_targets = true;
+		//update_rob_targets = true;
 		
 	}
 
@@ -854,47 +911,49 @@ void ofApp::generate_robot_targets()
 //-------------------------------------------------------------
 void ofApp::update_robot_targets()
 {
-	// Left
-	Pose* pose_left = new Pose();
-	pose_left->InitAsDefaultInstance();
-	pose_left->mutable_pos()->set_x(target_left.getGlobalPosition().x);
-	pose_left->mutable_pos()->set_y(target_left.getGlobalPosition().y);
-	pose_left->mutable_pos()->set_z(target_left.getGlobalPosition().z);
-	pose_left->mutable_orient()->set_x(target_left.getGlobalOrientation().x());
-	pose_left->mutable_orient()->set_y(target_left.getGlobalOrientation().y());
-	pose_left->mutable_orient()->set_z(target_left.getGlobalOrientation().z());
-	pose_left->mutable_orient()->set_w(target_left.getGlobalOrientation().w());
-	closest_body->mutable_targets()->mutable_left()->Swap(pose_left);
+	//// Left
+	//Pose* pose_left = new Pose();
+	//pose_left->InitAsDefaultInstance();
+	//pose_left->mutable_pos()->set_x(target_left.getGlobalPosition().x);
+	//pose_left->mutable_pos()->set_y(target_left.getGlobalPosition().y);
+	//pose_left->mutable_pos()->set_z(target_left.getGlobalPosition().z);
+	//pose_left->mutable_orient()->set_x(target_left.getGlobalOrientation().x());
+	//pose_left->mutable_orient()->set_y(target_left.getGlobalOrientation().y());
+	//pose_left->mutable_orient()->set_z(target_left.getGlobalOrientation().z());
+	//pose_left->mutable_orient()->set_w(target_left.getGlobalOrientation().w());
+	//closest_body->mutable_targets()->mutable_left()->Swap(pose_left);
 
-	// Right
-	Pose* pose_right = new Pose();
-	pose_right->InitAsDefaultInstance();
-	pose_right->mutable_pos()->set_x(target_right.getGlobalPosition().x);
-	pose_right->mutable_pos()->set_y(target_right.getGlobalPosition().y);
-	pose_right->mutable_pos()->set_z(target_right.getGlobalPosition().z);
-	pose_right->mutable_orient()->set_x(target_right.getGlobalOrientation().x());
-	pose_right->mutable_orient()->set_y(target_right.getGlobalOrientation().y());
-	pose_right->mutable_orient()->set_z(target_right.getGlobalOrientation().z());
-	pose_right->mutable_orient()->set_w(target_right.getGlobalOrientation().w());
-	closest_body->mutable_targets()->mutable_right()->Swap(pose_right);
+	//// Right
+	//Pose* pose_right = new Pose();
+	//pose_right->InitAsDefaultInstance();
+	//pose_right->mutable_pos()->set_x(target_right.getGlobalPosition().x);
+	//pose_right->mutable_pos()->set_y(target_right.getGlobalPosition().y);
+	//pose_right->mutable_pos()->set_z(target_right.getGlobalPosition().z);
+	//pose_right->mutable_orient()->set_x(target_right.getGlobalOrientation().x());
+	//pose_right->mutable_orient()->set_y(target_right.getGlobalOrientation().y());
+	//pose_right->mutable_orient()->set_z(target_right.getGlobalOrientation().z());
+	//pose_right->mutable_orient()->set_w(target_right.getGlobalOrientation().w());
+	//closest_body->mutable_targets()->mutable_right()->Swap(pose_right);
 }
 
 //-------------------------------------------------------------
 void ofApp::setup_client()
 {
+	// set default values
+	string ip_addr = "127.0.0.1";
+	int port = 55555;
+
+	// if we have incoming args, override the default values
 	if (args.size() == 3) {
 		cout << "Getting CMD input {"<< args[1] << ":" << args[2] << "}" << endl;
 		
-		string ip_addr = args[1];
-		int port;
+		ip_addr = args[1];
 		sscanf(args[2].c_str(), "%d", &port);
-		
-		client.setup(ip_addr, port);
+		// TEMP: increment the port so it's not the same as OSC's
+		port++;
 	}
-	else {
-		// default setup: 127.0.0.1, 11310
-		client.setup("127.0.0.1", 11310);
-	}
+
+	client.setup(ip_addr, port);
 
 	default_body.InitAsDefaultInstance();
 	default_body.set_interaction_mode(Body_InteractionMode_FOLLOW);
@@ -913,36 +972,50 @@ void ofApp::setup_gui()
 
 	params_sensor.setName("Sensor_Params");
 	params_sensor.add(sensor_offset.set("Offset", ofVec3f(-.30, -.30, -.65), ofVec3f(-1, -1, -1), ofVec3f(1, 1, 1)));
-	params_sensor.add(sensor_tilt.set("Tilt", -25, -90, 0));
+	params_sensor.add(sensor_tilt.set("Tilt", -25, -90, 90));
 
 	params_interaction.setName("Interaction_Params");
-	params_interaction.add(follow.set("Idle", true));
+	params_interaction.add(idle.set("Idle", true));
 	params_interaction.add(mirror.set("Mirror", false));
 	params_interaction.add(avoid.set("Avoid", false));
-	params_interaction.add(mirror_plane_offset.set("Plane_Offset", ofVec3f(.6,0,0), ofVec3f(-1, -1, -1), ofVec3f(1, 1, 1)));
-	params_interaction.add(robot_bounds_min.set("Robot_Bounds_Min", ofVec3f(-.5, -.8, 0), ofVec3f(0, -1, -1), ofVec3f(1, 1, 1)));
-	params_interaction.add(robot_bounds_max.set("Robot_Bounds_Max", ofVec3f(1, .8, .9), ofVec3f(0, -1, -1), ofVec3f(1, 1, 2.5)));
+	params_interaction.add(other.set("Other", false));
+	params_interaction.add(interaction_zone_offset.set("Interaction_Zone_Offset", ofVec3f(), ofVec3f(0,-2,0), ofVec3f(2,2,0)));
+	params_interaction.add(crouch_dist_min.set("Crouch_Dist_Min", 0, 0, 1));
+	params_interaction.add(crouch_dist_max.set("Crouch_Dist_Max", 1, 0, 2));
+	params_interaction.add(show_crouch.set("Show_Crouch",true));
+	//params_interaction.add(mirror_plane_offset.set("Plane_Offset", ofVec3f(.6,0,0), ofVec3f(-1, -1, -1), ofVec3f(1, 1, 1)));
+	//params_interaction.add(robot_bounds_min.set("Robot_Bounds_Min", ofVec3f(-.5, -.8, 0), ofVec3f(0, -1, -1), ofVec3f(1, 1, 1)));
+	//params_interaction.add(robot_bounds_max.set("Robot_Bounds_Max", ofVec3f(1, .8, .9), ofVec3f(0, -1, -1), ofVec3f(1, 1, 2.5)));
 
-	follow.addListener(this, &ofApp::listener_follow);
+	idle.addListener(this, &ofApp::listener_idle);
 	mirror.addListener(this, &ofApp::listener_mirror);
 	avoid.addListener(this, &ofApp::listener_avoid);
-	mirror_plane_offset.addListener(this, &ofApp::listener_mirror_plane_offset);
-	robot_bounds_min.addListener(this, &ofApp::listener_robot_bounds);
-	robot_bounds_max.addListener(this, &ofApp::listener_robot_bounds);
+	other.addListener(this, &ofApp::listener_other);
+	interaction_zone_offset.addListener(this, &ofApp::listener_interaction_zone_offset);
+	//mirror_plane_offset.addListener(this, &ofApp::listener_mirror_plane_offset);
+	//robot_bounds_min.addListener(this, &ofApp::listener_robot_bounds);
+	//robot_bounds_max.addListener(this, &ofApp::listener_robot_bounds);
+
+
 
 	panel.setup(params);
 	panel.add(params_sensor);
 	panel.add(params_interaction);
 	panel.setPosition(10, 10);
+
+	if (load_params_from_file)
+		panel.loadFromFile("settings.xml");
+
 }
 
 //-------------------------------------------------------------
-void ofApp::listener_follow(bool &val)
+void ofApp::listener_idle(bool &val)
 {
 	if (val) {
-		follow.set(true);
+		idle.set(true);
 		mirror.set(false);
 		avoid.set(false);
+		other.set(false);
 	}
 }
 
@@ -950,46 +1023,73 @@ void ofApp::listener_mirror(bool &val)
 {
 	if (val) {
 		mirror.set(true);
-		follow.set(false);
+		idle.set(false);
 		avoid.set(false);
+		other.set(false);
 	}
 }
 
 void ofApp::listener_avoid(bool &val)
 {
 	if (val) {
-		follow.set(false);
+		idle.set(false);
 		mirror.set(false);
 		avoid.set(true);
+		other.set(false);
 	}
 }
-void ofApp::listener_mirror_plane_offset(ofVec3f & val)
+
+void ofApp::listener_other(bool &val)
 {
-	mirror_plane.setVertex(0, ofVec3f(0 + val.x, -mirror_plane_width / 2. + val.y,  mirror_plane_height / 2. + val.z));
-	mirror_plane.setVertex(1, ofVec3f(0 + val.x, -mirror_plane_width / 2. + val.y, -mirror_plane_height / 2. + val.z));
-	mirror_plane.setVertex(2, ofVec3f(0 + val.x,  mirror_plane_width / 2. + val.y, -mirror_plane_height / 2. + val.z));
-	mirror_plane.setVertex(3, ofVec3f(0 + val.x,  mirror_plane_width / 2. + val.y,  mirror_plane_height / 2. + val.z));
+	if (val) {
+		idle.set(false);
+		mirror.set(false);
+		avoid.set(false);
+		other.set(true);
+	}
 }
-void ofApp::listener_robot_bounds(ofVec3f & val)
-{
-	robot_bounds.setGlobalPosition((robot_bounds_min.get() + robot_bounds_max.get()) / 2);
-	robot_bounds.setWidth(robot_bounds_max.get().x - robot_bounds_min.get().x);		// X Dim
-	robot_bounds.setHeight(robot_bounds_max.get().y - robot_bounds_min.get().y);	// Y Dim
-	robot_bounds.setDepth(robot_bounds_max.get().z - robot_bounds_min.get().z);		// Z Dim
 
-	avoid_zone.setGlobalPosition(robot_bounds.getGlobalPosition());
-	avoid_zone.setWidth(robot_bounds.getWidth());		// X Dim
-	avoid_zone.setHeight(robot_bounds.getHeight());	// Y Dim
-	avoid_zone.setDepth(3);		// Z Dim
+void ofApp::listener_interaction_zone_offset(ofVec3f & val) {
 
-	float mirror_zone_min_y = robot_bounds.getHeight();
-	mirror_zone.setWidth(1.5);
-	mirror_zone.setHeight(robot_bounds.getHeight() + .25);
-	mirror_zone.setDepth(3);
-	mirror_zone.setGlobalPosition(avoid_zone.getWidth() + .25, 0, robot_bounds.getGlobalPosition().z);
+	float i_zone_width = 2;
+	float i_zone_depth = 2.5;
+	float i_zone_height = 2;
+	ofVec3f i_zone_centroid = ofVec3f(i_zone_width / 2 + val.x, 0 + val.y, i_zone_depth / 2 - 2 * .254 + val.z);
 
+	interaction_zone.setGlobalPosition(i_zone_centroid);
+	interaction_zone.setWidth(i_zone_width);
+	interaction_zone.setHeight(i_zone_height);
+	interaction_zone.setDepth(i_zone_depth);
 
 }
+
+//void ofApp::listener_mirror_plane_offset(ofVec3f & val)
+//{
+//	mirror_plane.setVertex(0, ofVec3f(0 + val.x, -mirror_plane_width / 2. + val.y,  mirror_plane_height / 2. + val.z));
+//	mirror_plane.setVertex(1, ofVec3f(0 + val.x, -mirror_plane_width / 2. + val.y, -mirror_plane_height / 2. + val.z));
+//	mirror_plane.setVertex(2, ofVec3f(0 + val.x,  mirror_plane_width / 2. + val.y, -mirror_plane_height / 2. + val.z));
+//	mirror_plane.setVertex(3, ofVec3f(0 + val.x,  mirror_plane_width / 2. + val.y,  mirror_plane_height / 2. + val.z));
+//}
+//void ofApp::listener_robot_bounds(ofVec3f & val)
+//{
+//	robot_bounds.setGlobalPosition((robot_bounds_min.get() + robot_bounds_max.get()) / 2);
+//	robot_bounds.setWidth(robot_bounds_max.get().x - robot_bounds_min.get().x);		// X Dim
+//	robot_bounds.setHeight(robot_bounds_max.get().y - robot_bounds_min.get().y);	// Y Dim
+//	robot_bounds.setDepth(robot_bounds_max.get().z - robot_bounds_min.get().z);		// Z Dim
+//
+//	avoid_zone.setGlobalPosition(robot_bounds.getGlobalPosition());
+//	avoid_zone.setWidth(robot_bounds.getWidth());		// X Dim
+//	avoid_zone.setHeight(robot_bounds.getHeight());	// Y Dim
+//	avoid_zone.setDepth(3);		// Z Dim
+//
+//	float mirror_zone_min_y = robot_bounds.getHeight();
+//	mirror_zone.setWidth(1.5);
+//	mirror_zone.setHeight(robot_bounds.getHeight() + .25);
+//	mirror_zone.setDepth(3);
+//	mirror_zone.setGlobalPosition(avoid_zone.getWidth() + .25, 0, robot_bounds.getGlobalPosition().z);
+//
+//
+//}
 //-------------------------------------------------------------
 
 //-------------------------------------------------------------

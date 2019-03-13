@@ -82,7 +82,8 @@ void ofApp::update() {
 
 	}
 	else {
-		crouch_scalar = 1;
+		filter_crouch.update(ofVec3f(1, 1, 1));
+		crouch_scalar = filter_crouch.get_filtered().x;
 	}
 
 }

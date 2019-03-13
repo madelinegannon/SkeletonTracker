@@ -67,11 +67,11 @@ void ofApp::update() {
 		
 		float crouch_normalized = ofMap(butt_to_floor_dist, min, max, 0, 1, true);
 		
-		filter_crouch.update(ofVec3f(crouch_normalized, crouch_normalized, crouch_normalized));
+		//filter_crouch.update(ofVec3f(crouch_normalized, crouch_normalized, crouch_normalized));
 
 
-		crouch_scalar = filter_crouch.get_filtered().x; // a bit hacky to get 1D filter from 3D filter
-		cout << "\tmin: "<<min<< ", max: " << max<<", crouch_scalar: " << crouch_scalar << endl;
+		crouch_scalar = crouch_normalized;// filter_crouch.get_filtered().x; // a bit hacky to get 1D filter from 3D filter
+		//cout << "\tmin: "<<min<< ", max: " << max<<", crouch_scalar: " << crouch_scalar << endl;
 		
 		if (do_streaming) {
 			ofxOscMessage msg;
@@ -82,8 +82,9 @@ void ofApp::update() {
 
 	}
 	else {
-		filter_crouch.update(ofVec3f(1, 1, 1));
-		crouch_scalar = filter_crouch.get_filtered().x;
+		//filter_crouch.update(ofVec3f(1, 1, 1));
+		//crouch_scalar = filter_crouch.get_filtered().x;
+		crouch_scalar = 1;
 	}
 
 }
@@ -997,7 +998,7 @@ void ofApp::setup_gui()
 	//params_interaction.add(robot_bounds_min.set("Robot_Bounds_Min", ofVec3f(-.5, -.8, 0), ofVec3f(0, -1, -1), ofVec3f(1, 1, 1)));
 	//params_interaction.add(robot_bounds_max.set("Robot_Bounds_Max", ofVec3f(1, .8, .9), ofVec3f(0, -1, -1), ofVec3f(1, 1, 2.5)));
 
-	filter_crouch.setup();
+	//filter_crouch.setup();
 
 
 	idle.addListener(this, &ofApp::listener_idle);
@@ -1014,7 +1015,7 @@ void ofApp::setup_gui()
 	panel.setup(params);
 	panel.add(params_sensor);
 	panel.add(params_interaction);
-	panel.add(filter_crouch.get_gui());
+	//panel.add(filter_crouch.get_gui());
 	panel.setPosition(10, 10);
 
 	if (load_params_from_file)

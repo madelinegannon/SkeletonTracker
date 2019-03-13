@@ -219,12 +219,12 @@ The `crouch_scalar` is a linear mapping based on the distance between a skeleton
 
 Only skeletons whose heads are inside the blue `INTERACTION ZONE` box will have their data streamed. This sandboxing is to prevent noisy data, or 'accidental' skeletons from the environment, from being broadcast out.
 
-![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_skeletons-valid.gif)
+![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_skeleton-valid.gif)
 _Valid vs In-Valid Skeletons_
 
 #### Data Streaming Formats
 
-**Crouching Scalar**
+#### Crouching Scalar
 
 The `crouching_scalar` is broadcast over UDP at the user-defined `IP_ADDR:PORT`, with the OSC messaging format. An incoming message is the message address tag `crouch_scalar/`, plus a float arg for the scalar. Parsing the message should look something like this:
 
@@ -235,8 +235,9 @@ float incoming_scalar = 1;
 if (m.getAddress() == "/crouch_scalar") incoming_scalar = m.getArgAsFloat(0);
 ```
 
-**Skeleton**
+#### Skeleton
 The entire 26-joint skeleton is also broadcast out as a `body.proto` at `IP_ADDR:PORT+1`.
+
 
 
 ### Keypressed Cheat Sheet

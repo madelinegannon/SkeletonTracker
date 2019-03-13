@@ -226,7 +226,7 @@ _Valid vs In-Valid Skeletons_
 
 #### Crouching Scalar
 
-The `crouching_scalar` is broadcast over UDP at the user-defined `IP_ADDR:PORT`, with the OSC messaging format. An incoming message is the message address tag `crouch_scalar/`, plus a float arg for the scalar. Parsing the message should look something like this:
+The `crouching_scalar` is broadcast over UDP at the user-defined `IP_ADDR:PORT`, with the OSC messaging format. An incoming message is the message address tag `/crouch_scalar`, plus a float arg for the scalar. Parsing the message should look something like this:
 
 ```
 OscMessage m;

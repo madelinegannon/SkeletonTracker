@@ -19,6 +19,7 @@ void ofApp::setup() {
 
 	setup_osc();
 	setup_client();
+
 }
 
 //--------------------------------------------------------------
@@ -64,8 +65,12 @@ void ofApp::update() {
 		cout << "distance from butt to ground: " << (butt_to_floor_dist) << endl;
 		//cout << "distance from head to butt: " << butt.distance(head) << endl;
 		
+		float crouch_normalized = ofMap(butt_to_floor_dist, min, max, 0, 1, true);
 		
-		crouch_scalar = ofMap(butt_to_floor_dist, min, max, 0, 1, true);
+		filter_crouch.update(ofVec3f(crouch_normalized, crouch_normalized, crouch_normalized));
+
+
+		crouch_scalar = filter_crouch.get_filtered().x; // a bit hacky to get 1D filter from 3D filter
 		cout << "\tmin: "<<min<< ", max: " << max<<", crouch_scalar: " << crouch_scalar << endl;
 		
 		if (do_streaming) {
@@ -75,6 +80,9 @@ void ofApp::update() {
 			sender.sendMessage(msg);
 		}
 
+	}
+	else {
+		crouch_scalar = 1;
 	}
 
 }
@@ -988,6 +996,9 @@ void ofApp::setup_gui()
 	//params_interaction.add(robot_bounds_min.set("Robot_Bounds_Min", ofVec3f(-.5, -.8, 0), ofVec3f(0, -1, -1), ofVec3f(1, 1, 1)));
 	//params_interaction.add(robot_bounds_max.set("Robot_Bounds_Max", ofVec3f(1, .8, .9), ofVec3f(0, -1, -1), ofVec3f(1, 1, 2.5)));
 
+	filter_crouch.setup();
+
+
 	idle.addListener(this, &ofApp::listener_idle);
 	mirror.addListener(this, &ofApp::listener_mirror);
 	avoid.addListener(this, &ofApp::listener_avoid);
@@ -1002,6 +1013,7 @@ void ofApp::setup_gui()
 	panel.setup(params);
 	panel.add(params_sensor);
 	panel.add(params_interaction);
+	panel.add(filter_crouch.get_gui());
 	panel.setPosition(10, 10);
 
 	if (load_params_from_file)

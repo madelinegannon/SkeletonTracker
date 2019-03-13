@@ -8,6 +8,7 @@ An openFrameworks app that tracks and broadcasts skeletal data from a  Microsoft
 - [Running the App](#running-the-app)
     - [Calibrate the Sensor](#calibrate-the-sensor)
     - [Using the GUI](#using-the-gui)
+    - [Current Configuration](#current-configuration)
     - [Keypressed Cheat Sheet](#keypressed-cheat-sheet)
 
 ## Basic Use and Limitations
@@ -74,7 +75,7 @@ Follow these instructions when setting up on a new machine:
     Follow Protobuf C++ Installation Instructions [for Windows](https://github.com/protocolbuffers/protobuf/blob/master/src/README.md#c-installation---windows):
     
     ```
-    PS> vcpkg install protobuf protobuf:x64-windows
+    PS> .\vcpkg install protobuf protobuf:x64-windows
     ```
 
     Add a SYSTEM VARIABLE for your vcpkg directory path:
@@ -182,7 +183,7 @@ If the app is already built, you can just run it from the command line — passi
 > ./SkeletonTracker.exe 127.0.0.1 12345
 ```
 
-**NOTE: THIS STILL NEEDS TO BE TESTED WITH THE RECEIVER APP**
+Alternatively, you can add the absolute path and args to a `.bat` script for easier access. See `SkeletonTracker.bat` stored on the Desktop.
 
 ### Calibrate the Sensor
 
@@ -203,6 +204,37 @@ First, hitting the `Save` icon in the top right writes out the current parameter
 Second, you can toggle streaming data ON and OFF using `Stream Bodies` button towards the top.
 
 ![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_params_streaming.png)
+
+### Current Configuration
+
+In it's current configuration, the SkeletonTracker app streams out how much the closest detected person is crouching. This is broadcast as `crouch_scalar`: a value from 0 to 1, with 1 being all the way standing and 0 all the way crouching.
+
+![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_crouching.gif)
+
+The `crouch_scalar` is a linear mapping based on the distance between a skeleton's butt and the floor. There is no clever per-skeleton calibration here ... but there are `crouch_dist_min` and `crouch_dist_max` slider in the gui that can be used to better tune the scalar.
+
+![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_params_crouching.png)
+
+#### Valid Skeletons
+
+Only skeletons whose heads are inside the blue `INTERACTION ZONE` box will have their data streamed. This sandboxing is to prevent noisy data, or 'accidental' skeletons from the environment, from being broadcast out.
+
+#### Data Streaming Formats
+
+**Crouching Scalar**
+
+The `crouching_scalar` is broadcast over UDP at the user-defined `IP_ADDR:PORT`, with the OSC messaging format. An incoming message is the message address tag `crouch_scalar/`, plus a float arg for the scalar. Parsing the message should look something like this:
+
+```
+OscMessage m;
+receiver.getNextMessage(m);
+float incoming_scalar = 1;
+if (m.getAddress() == "/crouch_scalar") incoming_scalar = m.getArgAsFloat(0);
+```
+
+**Skeleton**
+The entire 26-joint skeleton is also broadcast out as a `body.proto` at `IP_ADDR:PORT+1`.
+
 
 ### Keypressed Cheat Sheet
 

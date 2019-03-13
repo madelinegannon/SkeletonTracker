@@ -56,16 +56,17 @@ void ofApp::update() {
 		ofVec3f butt = toOf(closest_body->mutable_joints(SPINE_BASE)->mutable_pose()).getGlobalPosition();
 
 		// make Z height from FLOOR, not ORIGIN
-		float floor_dist = 2 * .254;
+		float floor_height = -2 * .254;
+		float butt_to_floor_dist = butt.distance(ofVec3f(butt.x,butt.y,floor_height));
 
-		float min = crouch_dist_min;
-		float max = MAX(crouch_dist_max, butt.distance(head));
-		//cout << "distance from butt to ground: " << (butt.z + floor_dist) << endl;
+		float min = crouch_dist_min;// -floor_height;
+		float max = crouch_dist_max;//  MAX(crouch_dist_max, butt.distance(head));
+		cout << "distance from butt to ground: " << (butt_to_floor_dist) << endl;
 		//cout << "distance from head to butt: " << butt.distance(head) << endl;
-		//cout << "\tmin: "<<min<< ", max: " << max<<", crouch_scalar: " << crouch_scalar << endl;
 		
 		
-		crouch_scalar = ofMap(butt.z+floor_dist, min, max, 0, 1, true);
+		crouch_scalar = ofMap(butt_to_floor_dist, min, max, 0, 1, true);
+		cout << "\tmin: "<<min<< ", max: " << max<<", crouch_scalar: " << crouch_scalar << endl;
 		
 		if (do_streaming) {
 			ofxOscMessage msg;

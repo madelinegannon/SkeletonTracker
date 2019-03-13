@@ -219,6 +219,9 @@ The `crouch_scalar` is a linear mapping based on the distance between a skeleton
 
 Only skeletons whose heads are inside the blue `INTERACTION ZONE` box will have their data streamed. This sandboxing is to prevent noisy data, or 'accidental' skeletons from the environment, from being broadcast out.
 
+![](https://github.com/madelinegannon/SkeletonTracker/blob/master/reference/skeleton-tracker_skeletons-valid.gif)
+_Valid vs In-Valid Skeletons_
+
 #### Data Streaming Formats
 
 **Crouching Scalar**

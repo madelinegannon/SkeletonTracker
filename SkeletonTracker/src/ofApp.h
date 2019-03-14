@@ -34,7 +34,7 @@ class ofApp : public ofBaseApp{
 		ofxOscSender sender;
 		void setup_osc();
 
-		FilteredPoint filter_crouch;
+		//FilteredPoint filter_crouch;
 		 
 
 		// ---------- SENSOR SETUP -----------

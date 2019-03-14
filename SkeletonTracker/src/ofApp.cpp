@@ -85,6 +85,13 @@ void ofApp::update() {
 		//filter_crouch.update(ofVec3f(1, 1, 1));
 		//crouch_scalar = filter_crouch.get_filtered().x;
 		crouch_scalar = 1;
+
+		if (do_streaming) {
+			ofxOscMessage msg;
+			msg.setAddress("/crouch_scalar");
+			msg.addFloatArg(-1.0);
+			sender.sendMessage(msg);
+		}
 	}
 
 }
